@@ -163,11 +163,9 @@ class Letter5Effect {
       const rawOffset = (sectionCenter - viewportCenter) / (windowHeight / 2);
       const clampedOffset = Math.max(-1, Math.min(1, rawOffset));
       
-      // Apply easing to slow down near center
-      const easedOffset = easeInOutCubic(Math.abs(clampedOffset)) * Math.sign(clampedOffset);
-
       // Set a single CSS variable on the section; wrappers use CSS calc with their --slice-index
-      this.section.style.setProperty('--effect-progress-abs', `${Math.abs(easedOffset)}`);
+      const linearProgress = Math.abs(clampedOffset);
+      this.section.style.setProperty('--effect-progress-abs', `${linearProgress}`);
     };
 
     window.addEventListener('scroll', updateEffect);
