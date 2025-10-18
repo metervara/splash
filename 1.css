@@ -2,6 +2,11 @@
   --text-color: white;
   --bg-color: blacK;
   
+  /* Letter-5 effect controls */
+  --letter-5-slices: 15; /* number of vertical slices */
+  --letter-5-v-offset: 50vh; /* max vertical offset per edge slice */
+  --effect-progress: 0; /* runtime-computed per section by JS, unitless -1..1 */
+  
   /* Animation variables */
   --transition-duration: 300ms;
   --transition-easing: ease-in-out;
