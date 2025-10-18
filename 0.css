@@ -1,0 +1,7 @@
+:root { --accent: #5b9cff; }
+body { display: grid; place-items: center; min-height: 100dvh; background: radial-gradient(1200px 800px at 50% 20%, #e8f1ff, #ffffff 60%); color: #0a0a0a; }
+main { text-align: center; }
+h1 { font-size: 4rem; letter-spacing: -0.02em; color: var(--accent); }
+p { opacity: 0.7; margin-top: 0.5rem; }
+
+

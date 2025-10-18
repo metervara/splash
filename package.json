@@ -1,0 +1,21 @@
+{
+  "name": "metervara-splash",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --open"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "private": "true",
+  "devDependencies": {
+    "@types/node": "^24.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10"
+  }
+}
