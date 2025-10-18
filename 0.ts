@@ -106,13 +106,10 @@ class Letter5Effect {
       column.style.alignItems = 'center';
       column.style.justifyContent = 'center';
       column.style.overflow = 'hidden';
-      column.style.willChange = 'transform';
-      column.style.transform = 'translateY(calc(var(--effect-progress, 0) * var(--letter-5-v-offset) * var(--slice-weight)))';
+      // No vertical movement anymore; masking remains via column overflow hidden
 
-      // Per-slice weight (0 at center, 1 at edges), mirrored
-      const mid = (this.columnCount - 1) / 2;
-      const sliceWeight = Math.abs((i - mid) / mid);
-      column.style.setProperty('--slice-weight', String(sliceWeight));
+      // Set per-slice index (0..N-1) for CSS calc usage
+      column.style.setProperty('--slice-index', String(i));
       
       // Create wrapper that spans N× width to hold full content, then shift left by i*(100/N)%
       const wrapper = document.createElement('div');
@@ -124,9 +121,11 @@ class Letter5Effect {
       wrapper.style.display = 'flex';
       wrapper.style.alignItems = 'center';
       wrapper.style.justifyContent = 'center';
-      // Shift wrapper left so that the i:th slice shows the correct vertical portion
-      const shiftPercent = (100 / this.columnCount) * i;
-      wrapper.style.transform = `translateX(-${shiftPercent}%)`;
+      wrapper.style.willChange = 'transform';
+      // Horizontal transform: interpolate between assembled (i/N) and centered (0.5 - 1/(2N)) by progress magnitude
+      // translateX is in % of wrapper width; variables are unitless
+      wrapper.style.transform = 
+        'translateX(calc(-100% * ( ((1 - var(--effect-progress-abs, 0)) * (var(--slice-index) / var(--letter-5-slices))) + (var(--effect-progress-abs, 0) * (0.5 - (0.5 / var(--letter-5-slices)))) )))';
 
       // Create content element (full letter) centered within wrapper
       const content = document.createElement('div');
@@ -167,8 +166,8 @@ class Letter5Effect {
       // Apply easing to slow down near center
       const easedOffset = easeInOutCubic(Math.abs(clampedOffset)) * Math.sign(clampedOffset);
 
-      // Set a single CSS variable on the section; columns use CSS calc with their --slice-weight
-      this.section.style.setProperty('--effect-progress', `${easedOffset}`);
+      // Set a single CSS variable on the section; wrappers use CSS calc with their --slice-index
+      this.section.style.setProperty('--effect-progress-abs', `${Math.abs(easedOffset)}`);
     };
 
     window.addEventListener('scroll', updateEffect);
