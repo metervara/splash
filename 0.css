@@ -1,7 +1,83 @@
-:root { --accent: #5b9cff; }
-body { display: grid; place-items: center; min-height: 100dvh; background: radial-gradient(1200px 800px at 50% 20%, #e8f1ff, #ffffff 60%); color: #0a0a0a; }
-main { text-align: center; }
-h1 { font-size: 4rem; letter-spacing: -0.02em; color: var(--accent); }
-p { opacity: 0.7; margin-top: 0.5rem; }
+:root {
+  --text-color: hsl(330, 90%, 70%);
+  --bg-color: #0000ff;
+}
 
+html, body {
+  height: 100%; 
+}
+body {
+  margin: 0;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  text-align: center;
 
+  background-color: var(--bg-color);
+}
+
+h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(2.5rem, 8vw, 8rem);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+/* tfx-metervara effect (CSS-only frames intro) */
+.tfx-metervara {
+  position: relative;
+  display: inline-block;
+  color: transparent; /* actual text is in ::after frames */
+}
+.tfx-metervara::after {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  content: "metervara.";
+  color: var(--text-color);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  pointer-events: none;
+  display: inline-block; /* stabilize layout width */
+  width: 10ch; /* consistent container across frames */
+  text-align: center; /* keep frames centered */
+  letter-spacing: 0; /* avoid subpixel drift in Safari */
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+
+  /* Two-phase: slow blink, then reveal */
+  animation-name: blinkStart, centerReveal;
+  animation-timing-function: steps(1, end), steps(1, end);
+  /* Blink starts immediately and holds its frames; reveal waits, then plays */
+  animation-fill-mode: both, forwards;
+  animation-iteration-count: 1, 1;
+  animation-duration: 2100ms, 800ms;
+  animation-delay: 0ms, 2100ms;
+}
+
+/* Prelude: blink the first frame three times, slower than reveal */
+@keyframes blinkStart {
+  0% { content: "    ▁     "; }
+  16.667% { content: ""; }
+  33.333% { content: "    ▁     "; }
+  50% { content: ""; }
+  66.667% { content: "    ▁     "; }
+  83.333% { content: ""; }
+  100% { content: "    ▁     "; }
+}
+
+/* Frames for the Metervara intro (replicated from tfx-metervara) */
+@keyframes centerReveal {
+  0% { content: "    ▁     "; }
+  14.286% { content: "   ▁▄▁    "; }
+  28.571% { content: "  ▁▄r▄▁   "; }
+  42.857% { content: " ▁▄erv▄▁  "; }
+  57.143% { content: "▁▄terva▄▁ "; }
+  71.429% { content: "▄etervar▄_ "; }
+  85.714% { content: "metervara▄ "; }
+  100% { content: "Metervara."; }
+}
