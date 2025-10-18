@@ -1,9 +1,4 @@
-/**
- * 
- * Each letter has  a different effect (kinetic typography)
- * 
- * 
- */
+
 
 // Easing function for smooth transitions near center
 function easeInOutCubic(t: number): number {
@@ -125,7 +120,7 @@ class Letter5Effect {
       // Horizontal transform: interpolate between assembled (i/N) and centered (0.5 - 1/(2N)) by progress magnitude
       // translateX is in % of wrapper width; variables are unitless
       wrapper.style.transform = 
-        'translateX(calc(-100% * ( ((1 - var(--effect-progress-abs, 0)) * (var(--slice-index) / var(--letter-5-slices))) + (var(--effect-progress-abs, 0) * (0.5 - (0.5 / var(--letter-5-slices)))) )))';
+        'translateX(calc(var(--letter-5-dir, 1) * -100% * ( ((1 - var(--effect-progress-abs, 0)) * (var(--slice-index) / var(--letter-5-slices))) + (var(--effect-progress-abs, 0) * (0.5 - (0.5 / var(--letter-5-slices)))) )))';
 
       // Create content element (full letter) centered within wrapper
       const content = document.createElement('div');
@@ -158,14 +153,14 @@ class Letter5Effect {
       const windowHeight = window.innerHeight;
       const sectionCenter = rect.top + (rect.height / 2);
       const viewportCenter = windowHeight / 2;
-      
-      // Calculate offset from center (-1 to 1)
-      const rawOffset = (sectionCenter - viewportCenter) / (windowHeight / 2);
-      const clampedOffset = Math.max(-1, Math.min(1, rawOffset));
-      
+
+      // Distance-based linear progress across entire visibility window
+      const distance = Math.abs(sectionCenter - viewportCenter);
+      const halfSpan = (windowHeight + rect.height) / 2; // distance at which section is fully out of view
+      const progress = Math.min(1, distance / halfSpan);
+
       // Set a single CSS variable on the section; wrappers use CSS calc with their --slice-index
-      const linearProgress = Math.abs(clampedOffset);
-      this.section.style.setProperty('--effect-progress-abs', `${linearProgress}`);
+      this.section.style.setProperty('--effect-progress-abs', `${progress}`);
     };
 
     window.addEventListener('scroll', updateEffect);
