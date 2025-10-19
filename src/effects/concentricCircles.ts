@@ -6,6 +6,8 @@ export class ConcentricCirclesEffect implements SectionEffect {
   private circles: HTMLElement[] = [];
   private circleCount: number = 8;
   private maxRadius: number = 0;
+  private maxScale: number = 2.4;
+  private maxAngle: number = 180;
 
   constructor(section: HTMLElement) {
     this.section = section;
@@ -35,11 +37,28 @@ export class ConcentricCirclesEffect implements SectionEffect {
   }
 
   private readConfigFromCSS(): void {
+    // Read from data attributes first, fall back to CSS variables for backward compatibility
+    const dataCircles = this.section.getAttribute('data-circles');
+    const dataMaxScale = this.section.getAttribute('data-max-scale');
+    const dataMaxAngle = this.section.getAttribute('data-max-angle');
+    
     const styles = getComputedStyle(this.section);
     const circlesVar = styles.getPropertyValue('--circles').trim();
-    const parsedCircles = parseInt(circlesVar || '', 10);
+    
+    const circlesValue = dataCircles || circlesVar;
+    const parsedCircles = parseInt(circlesValue || '', 10);
     if (!Number.isNaN(parsedCircles) && parsedCircles > 1) {
       this.circleCount = parsedCircles;
+    }
+    
+    const parsedMaxScale = parseFloat(dataMaxScale || '');
+    if (!Number.isNaN(parsedMaxScale) && parsedMaxScale > 0) {
+      this.maxScale = parsedMaxScale;
+    }
+    
+    const parsedMaxAngle = parseFloat(dataMaxAngle || '');
+    if (!Number.isNaN(parsedMaxAngle) && parsedMaxAngle >= 0) {
+      this.maxAngle = parsedMaxAngle;
     }
   }
 
@@ -100,13 +119,20 @@ export class ConcentricCirclesEffect implements SectionEffect {
       // Inherit background color from main element's animated class system
       contentWrapper.style.backgroundColor = 'var(--letter-0-bg)';
       
+      // Set max values as CSS variables for transform calculations
+      contentWrapper.style.setProperty('--max-scale', String(this.maxScale));
+      contentWrapper.style.setProperty('--max-angle', `${this.maxAngle}deg`);
+      
       // Transform: scale and rotate based on circle index and effect progress
       // Outer circles (lower index) scale more and rotate more
       // Progress 0 = normal, Progress 1 = maximum distortion
       // Use signed progress for rotation direction
+      const scaleMultiplier = this.circleCount > 1 ? (this.circleCount - i - 1) / (this.circleCount - 1) : 0;
+      const rotationMultiplier = this.circleCount > 1 ? (this.circleCount - i - 1) / (this.circleCount - 1) : 0;
+      
       contentWrapper.style.transform = `
-        scale(calc(1 + var(--effect-progress-abs, 0) * (1 + (var(--circle-count) - var(--circle-index) - 1) * 0.2))) 
-        rotate(calc(var(--effect-progress-signed, 0) * 180deg * (var(--circle-count) - var(--circle-index) - 1) / (var(--circle-count) - 1)))
+        scale(calc(1 + var(--effect-progress-abs, 0) * (var(--max-scale) - 1) * ${scaleMultiplier})) 
+        rotate(calc(var(--effect-progress-signed, 0) * var(--max-angle) * ${rotationMultiplier}))
       `;
 
       // Create content element

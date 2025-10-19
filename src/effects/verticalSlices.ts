@@ -6,6 +6,7 @@ export class VerticalSlicesEffect implements SectionEffect {
   private readonly letterElement: HTMLElement | null;
   private columns: HTMLElement[] = [];
   private columnCount: number = 19;
+  private maxOffset: number = 0.5;
 
   constructor(section: HTMLElement) {
     this.section = section;
@@ -31,14 +32,23 @@ export class VerticalSlicesEffect implements SectionEffect {
   }
 
   private readConfigFromCSS(): void {
+    // Read from data attributes first, fall back to CSS variables for backward compatibility
+    const dataSlices = this.section.getAttribute('data-slices');
+    const dataMaxOffset = this.section.getAttribute('data-max-offset');
+    
     const styles = getComputedStyle(this.section);
-    // Prefer a generic --slices, fall back to legacy --letter-5-slices for compatibility
     const genericSlices = styles.getPropertyValue('--slices').trim();
     const legacySlices = styles.getPropertyValue('--letter-5-slices').trim();
-    const value = genericSlices || legacySlices;
-    const parsedSlices = parseInt(value || '', 10);
+    
+    const slicesValue = dataSlices || genericSlices || legacySlices;
+    const parsedSlices = parseInt(slicesValue || '', 10);
     if (!Number.isNaN(parsedSlices) && parsedSlices > 1) {
       this.columnCount = parsedSlices;
+    }
+    
+    const parsedMaxOffset = parseFloat(dataMaxOffset || '');
+    if (!Number.isNaN(parsedMaxOffset) && parsedMaxOffset > 0) {
+      this.maxOffset = parsedMaxOffset;
     }
   }
 
@@ -75,9 +85,12 @@ export class VerticalSlicesEffect implements SectionEffect {
       wrapper.style.alignItems = 'center';
       wrapper.style.justifyContent = 'center';
       wrapper.style.willChange = 'transform';
-      // Keep compatibility with existing CSS variables: --letter-5-dir and --letter-5-slices
+      // Set the actual slice count and max offset as CSS variables for the transform calculation
+      wrapper.style.setProperty('--actual-slices', String(this.columnCount));
+      wrapper.style.setProperty('--max-offset', String(this.maxOffset));
+      // Keep compatibility with existing CSS variables: --letter-5-dir
       wrapper.style.transform =
-        'translateX(calc(var(--letter-5-dir, 1) * -100% * ( ((1 - var(--effect-progress-abs, 0)) * (var(--slice-index) / var(--letter-5-slices, var(--slices)))) + (var(--effect-progress-abs, 0) * (0.5 - (0.5 / var(--letter-5-slices, var(--slices))))) )))';
+        'translateX(calc(var(--letter-5-dir, 1) * -100% * ( ((1 - var(--effect-progress-abs, 0)) * (var(--slice-index) / var(--actual-slices))) + (var(--effect-progress-abs, 0) * (0.5 - (0.5 / var(--actual-slices)))) )))';
 
       const content = document.createElement('div');
       content.textContent = originalContent;
