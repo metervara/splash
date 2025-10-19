@@ -16,6 +16,13 @@ export class VerticalSlicesEffect implements SectionEffect {
   init(): void {
     if (!this.letterElement) return;
     this.readConfigFromCSS();
+    // Initialize progress based on current position so sections start at the correct state
+    // (i.e., max effect when fully outside viewport)
+    const rect = this.section.getBoundingClientRect();
+    const viewportH = window.innerHeight;
+    const initial = this.computeNormalizedOffset(rect, viewportH);
+    const progressAbs = Math.min(1, Math.abs(initial));
+    this.section.style.setProperty('--effect-progress-abs', `${progressAbs}`);
     this.createColumns();
   }
 
@@ -47,6 +54,14 @@ export class VerticalSlicesEffect implements SectionEffect {
       // Allow amplification (>1) and disable negatives
       this.maxAmount = Math.max(0, parsedMaxAmount);
     }
+  }
+
+  private computeNormalizedOffset(rect: DOMRect, viewportH: number): number {
+    const sectionCenter = rect.top + rect.height / 2;
+    const viewportCenter = viewportH / 2;
+    const denom = (viewportH + rect.height) / 2; // half-span where |offset|=1 at full out-of-view center
+    const raw = (sectionCenter - viewportCenter) / denom;
+    return Math.max(-1, Math.min(1, raw));
   }
 
   private createColumns(): void {
