@@ -2,6 +2,7 @@
 
 import { getEffectFactory } from './src/effects';
 import type { SectionEffect } from './src/effects/types';
+import { initSplashOverlay } from './src/shared/utils';
 
 class SpringValue {
   private readonly stiffness: number; // k (higher = snappier)
@@ -230,4 +231,5 @@ class IntersectionOrchestrator {
 
 document.addEventListener('DOMContentLoaded', () => {
   new IntersectionOrchestrator();
+  initSplashOverlay();
 });

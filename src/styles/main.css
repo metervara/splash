@@ -1,0 +1,29 @@
+/* Shared overlay styles */
+:root {
+  --secondary-bg: black;
+  --secondary-text: white;
+}
+
+#splash-overlay {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  padding: 8px 12px;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  text-decoration: none;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 150ms linear, color 150ms linear;
+}
+
+#splash-overlay:hover {
+  background: var(--secondary-text);
+  color: var(--secondary-bg);
+}
+
+
