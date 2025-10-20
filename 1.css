@@ -3,6 +3,7 @@
   --bg-color: blacK;
   
   --effect-progress-abs: 0; /* runtime-computed per section by JS, unitless 0..1 */
+  --effect-progress-signed: 0; /* runtime-computed per section by JS, -1..1 */
   
   /* Animation variables */
   --transition-duration: 500ms;
@@ -67,6 +68,7 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .letter {
@@ -134,3 +136,180 @@ main.active-letter-8 {
   color: var(--letter-8-text);
 }
 */
+
+/* Unified slices effect */
+/* Base hook */
+section.effect-unified .letter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Shared CSS variables with defaults */
+section.effect-unified {
+  --slice-count: 19;
+  --max-amount: 1;
+  --max-translate-x: 0px;
+  --max-translate-y: 0px;
+  --max-skew-x: 0deg;
+  --max-skew-y: 0deg;
+  --max-rotate: 0deg;
+  --max-scale: 1;
+  /* Progress indirection (can be overridden by JS) */
+  --p-assemble: var(--effect-progress-abs);
+  --p-translate-x: var(--effect-progress-abs);
+  --p-translate-y: var(--effect-progress-abs);
+  --p-skew-x: var(--effect-progress-abs);
+  --p-skew-y: var(--effect-progress-abs);
+  --p-rotate: var(--effect-progress-signed);
+  --p-scale: var(--effect-progress-abs);
+}
+
+/* Vertical layout */
+section.effect-unified.slice-vertical .letter {
+  flex-direction: row;
+}
+section.effect-unified.slice-vertical .slice {
+  position: relative;
+  width: calc(100% / var(--slice-count));
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+section.effect-unified.slice-vertical .slice-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% * var(--slice-count));
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform-origin: 50% 50%;
+  /* Assemble/disassemble + transforms */
+  transform:
+    translateX(
+      calc(-100% * (
+        ((1 - (var(--p-assemble) * var(--max-amount))) * (var(--slice-index) / var(--slice-count))) +
+        ((var(--p-assemble) * var(--max-amount)) * (0.5 - (0.5 / var(--slice-count))))
+      ))
+    )
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1)));
+}
+section.effect-unified.slice-vertical .slice-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+/* Horizontal layout */
+section.effect-unified.slice-horizontal .letter {
+  flex-direction: column;
+}
+section.effect-unified.slice-horizontal .slice {
+  position: relative;
+  width: 100%;
+  height: calc(100% / var(--slice-count));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+section.effect-unified.slice-horizontal .slice-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% * var(--slice-count));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform-origin: 50% 50%;
+  transform:
+    translateY(
+      calc(-100% * (
+        ((1 - (var(--p-assemble) * var(--max-amount))) * (var(--slice-index) / var(--slice-count))) +
+        ((var(--p-assemble) * var(--max-amount)) * (0.5 - (0.5 / var(--slice-count))))
+      ))
+    )
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1)));
+}
+section.effect-unified.slice-horizontal .slice-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+/* Concentric layout */
+section.effect-unified.slice-concentric .letter {
+  position: relative;
+}
+section.effect-unified.slice-concentric .circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+section.effect-unified.slice-concentric .circle-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--letter-0-bg);
+  will-change: transform;
+  /* Multiplier decreases towards center: (circleCount-idx-1)/(circleCount-1) */
+  --circle-mul-denom: max(1, calc(var(--circle-count, 8) - 1));
+  --circle-mul: calc((var(--circle-count, 8) - var(--circle-index) - 1) / var(--circle-mul-denom));
+  transform:
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate) * var(--circle-mul)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1) * var(--circle-mul)));
+}
+section.effect-unified.slice-concentric .circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+}

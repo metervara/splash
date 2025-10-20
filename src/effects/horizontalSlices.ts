@@ -38,6 +38,7 @@ export class HorizontalSlicesEffect implements SectionEffect {
     const dataMaxTranslate = this.section.getAttribute('data-max-translate');
     const dataAmpPx = this.section.getAttribute('data-amp-px'); // legacy name support
     const dataMaxSkew = this.section.getAttribute('data-max-skew');
+    const dataSkewMaxLegacy = this.section.getAttribute('data-skew-max');
 
     const parsedSlices = parseInt((dataSlices || '').trim(), 10);
     if (!Number.isNaN(parsedSlices) && parsedSlices > 1) {
@@ -54,7 +55,7 @@ export class HorizontalSlicesEffect implements SectionEffect {
       this.maxTranslatePx = parsedMaxTranslate;
     }
 
-    const parsedMaxSkew = parseFloat((dataMaxSkew || '').trim());
+    const parsedMaxSkew = parseFloat((dataMaxSkew || dataSkewMaxLegacy || '').trim());
     if (!Number.isNaN(parsedMaxSkew)) {
       this.maxSkewDeg = parsedMaxSkew;
     }
