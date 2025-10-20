@@ -23,5 +23,10 @@
   data-rotate-mode="signed"
   data-scale-mode="abs"
 >
+
+data-stagger-scale
+data-stagger-rotate
+data-stagger-translate-x, data-stagger-translate-y
+data-stagger-skew-x, data-stagger-skew-y
   <div id="letter-X" class="letter">X</div>
 </section>

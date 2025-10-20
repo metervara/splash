@@ -34,6 +34,14 @@ export class UnifiedSlicesEffect implements SectionEffect {
   private modeRotate: ProgressMode = 'signed';
   private modeScale: ProgressMode = 'abs';
 
+  // Per-property stagger (0 = neutral). Positive increases effect with distance from center
+  private staggerTranslateX: number = 0;
+  private staggerTranslateY: number = 0;
+  private staggerSkewX: number = 0;
+  private staggerSkewY: number = 0;
+  private staggerRotate: number = 0;
+  private staggerScale: number = 0;
+
   constructor(section: HTMLElement) {
     this.section = section;
     this.letterElement = section.querySelector('.letter');
@@ -111,6 +119,18 @@ export class UnifiedSlicesEffect implements SectionEffect {
     this.modeSkewY = parseProgressMode(this.section.getAttribute('data-skew-y-mode'), 'abs');
     this.modeRotate = parseProgressMode(this.section.getAttribute('data-rotate-mode'), 'signed');
     this.modeScale = parseProgressMode(this.section.getAttribute('data-scale-mode'), 'abs');
+
+    // Stagger amounts (unitless multipliers). 0 = neutral, 1 = +100% at edges
+    const parseStagger = (name: string) => {
+      const v = parseFloat((this.section.getAttribute(name) || '').trim());
+      return Number.isFinite(v) ? v : 0;
+    };
+    this.staggerTranslateX = parseStagger('data-stagger-translate-x');
+    this.staggerTranslateY = parseStagger('data-stagger-translate-y');
+    this.staggerSkewX = parseStagger('data-stagger-skew-x');
+    this.staggerSkewY = parseStagger('data-stagger-skew-y');
+    this.staggerRotate = parseStagger('data-stagger-rotate');
+    this.staggerScale = parseStagger('data-stagger-scale');
   }
 
   private applyInitCSSVariables(): void {
@@ -132,6 +152,14 @@ export class UnifiedSlicesEffect implements SectionEffect {
     this.section.style.setProperty('--p-skew-y', this.modeSkewY === 'signed' ? 'var(--effect-progress-signed)' : 'var(--effect-progress-abs)');
     this.section.style.setProperty('--p-rotate', this.modeRotate === 'signed' ? 'var(--effect-progress-signed)' : 'var(--effect-progress-abs)');
     this.section.style.setProperty('--p-scale', this.modeScale === 'signed' ? 'var(--effect-progress-signed)' : 'var(--effect-progress-abs)');
+
+    // Stagger variables
+    this.section.style.setProperty('--stagger-translate-x', String(this.staggerTranslateX));
+    this.section.style.setProperty('--stagger-translate-y', String(this.staggerTranslateY));
+    this.section.style.setProperty('--stagger-skew-x', String(this.staggerSkewX));
+    this.section.style.setProperty('--stagger-skew-y', String(this.staggerSkewY));
+    this.section.style.setProperty('--stagger-rotate', String(this.staggerRotate));
+    this.section.style.setProperty('--stagger-scale', String(this.staggerScale));
   }
 
   private applyClasses(): void {
@@ -155,6 +183,10 @@ export class UnifiedSlicesEffect implements SectionEffect {
       const slice = document.createElement('div');
       slice.className = 'slice';
       slice.style.setProperty('--slice-index', String(i));
+      // Distance from center (0 at center, 1 at far edge)
+      const centerIndex = (this.sliceCount - 1) / 2;
+      const distance = Math.abs(i - centerIndex) / Math.max(1, centerIndex);
+      slice.style.setProperty('--slice-distance', String(distance));
 
       const wrapper = document.createElement('div');
       wrapper.className = 'slice-wrapper';
@@ -194,6 +226,10 @@ export class UnifiedSlicesEffect implements SectionEffect {
       const circle = document.createElement('div');
       circle.className = 'circle';
       circle.style.setProperty('--circle-index', String(i));
+      const mulDenom = Math.max(1, this.sliceCount - 1);
+      const circleMul = (this.sliceCount - i - 1) / mulDenom; // 0 at inner, 1 at outer
+      // For concentric, distance should be 1 at outer and 0 at inner; reuse circleMul
+      circle.style.setProperty('--circle-distance', String(circleMul));
       circle.style.width = `${diameter}px`;
       circle.style.height = `${diameter}px`;
 

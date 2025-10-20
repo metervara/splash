@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Metervara Splash #1</title>
+    <title>Metervara Splash #1 - text slicing</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/styles/reset.css">
+    <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="./1.css">
     <script type="module" src="./1.ts"></script>
   </head>
@@ -18,10 +19,45 @@
     data-spring-damping="10"
     data-spring-epsilon="0.0005"
     data-spring-vel-epsilon="0.0005">
-    <section>
+    <section
+      data-effect="slices"
+      data-slice-type="concentric"       
+      data-slices="11"                 
+      data-max-amount="2"            
+      data-max-translate-x="0"        
+      data-max-translate-y="0"         
+      data-max-skew-x="0"             
+      data-max-skew-y="0"              
+      data-max-rotate="0"              
+      data-max-scale="2.0"               
+      data-translate-x-mode="signed"   
+      data-translate-y-mode="abs"
+      data-skew-x-mode="abs"
+      data-skew-y-mode="abs"
+      data-rotate-mode="signed"
+      data-scale-mode="abs"
+      data-stagger-scale="2.0"
+      >
       <div id="letter-0" class="letter">M</div>
     </section>
-    <section>
+    <section 
+      data-effect="slices"
+      data-slice-type="vertical"       
+      data-slices="15"                 
+      data-max-amount="1.5"            
+      data-max-translate-x="0"        
+      data-max-translate-y="0"         
+      data-max-skew-x="0"             
+      data-max-skew-y="0"              
+      data-max-rotate="20"              
+      data-max-scale="0.1"               
+      data-translate-x-mode="signed"   
+      data-translate-y-mode="signed"
+      data-skew-x-mode="signed"
+      data-skew-y-mode="signed"
+      data-rotate-mode="signed"
+      data-scale-mode="abs"
+    >
       <div id="letter-1" class="letter">E</div>
     </section>
     <!-- <section>
@@ -32,18 +68,19 @@
     data-slice-type="horizontal"       
     data-slices="15"                 
     data-max-amount="1.5"            
-    data-max-translate-x="50"        
-    data-max-translate-y="20"         
+    data-max-translate-x="0"        
+    data-max-translate-y="0"         
     data-max-skew-x="0"             
     data-max-skew-y="0"              
     data-max-rotate="90"              
-    data-max-scale="1.2"               
+    data-max-scale="1.5"               
     data-translate-x-mode="signed"   
     data-translate-y-mode="abs"
     data-skew-x-mode="abs"
     data-skew-y-mode="abs"
     data-rotate-mode="signed"
     data-scale-mode="abs"
+    data-stagger-scale="1.0"
   >
     <div id="letter-2" class="letter">T</div>
   </section>

@@ -158,6 +158,13 @@ section.effect-unified {
   --max-skew-y: 0deg;
   --max-rotate: 0deg;
   --max-scale: 1;
+  /* Stagger amounts (0 neutral). Applied as 1 + distance * amount */
+  --stagger-translate-x: 0;
+  --stagger-translate-y: 0;
+  --stagger-skew-x: 0;
+  --stagger-skew-y: 0;
+  --stagger-rotate: 0;
+  --stagger-scale: 0;
   /* Progress indirection (can be overridden by JS) */
   --p-assemble: var(--effect-progress-abs);
   --p-translate-x: var(--effect-progress-abs);
@@ -193,6 +200,13 @@ section.effect-unified.slice-vertical .slice-wrapper {
   will-change: transform;
   transform-origin: 50% 50%;
   /* Assemble/disassemble + transforms */
+  --dist: var(--slice-distance, 0);
+  --mul-translate-x: calc(1 + var(--dist) * var(--stagger-translate-x));
+  --mul-translate-y: calc(1 + var(--dist) * var(--stagger-translate-y));
+  --mul-skew-x: calc(1 + var(--dist) * var(--stagger-skew-x));
+  --mul-skew-y: calc(1 + var(--dist) * var(--stagger-skew-y));
+  --mul-rotate: calc(1 + var(--dist) * var(--stagger-rotate));
+  --mul-scale: calc(1 + var(--dist) * var(--stagger-scale));
   transform:
     translateX(
       calc(-100% * (
@@ -200,12 +214,12 @@ section.effect-unified.slice-vertical .slice-wrapper {
         ((var(--p-assemble) * var(--max-amount)) * (0.5 - (0.5 / var(--slice-count))))
       ))
     )
-    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
-    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
-    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
-    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
-    rotate(calc(var(--p-rotate) * var(--max-rotate)))
-    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1)));
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x) * var(--mul-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y) * var(--mul-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x) * var(--mul-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y) * var(--mul-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate) * var(--mul-rotate)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1) * var(--mul-scale)));
 }
 section.effect-unified.slice-vertical .slice-content {
   position: absolute;
@@ -243,6 +257,13 @@ section.effect-unified.slice-horizontal .slice-wrapper {
   justify-content: center;
   will-change: transform;
   transform-origin: 50% 50%;
+  --dist: var(--slice-distance, 0);
+  --mul-translate-x: calc(1 + var(--dist) * var(--stagger-translate-x));
+  --mul-translate-y: calc(1 + var(--dist) * var(--stagger-translate-y));
+  --mul-skew-x: calc(1 + var(--dist) * var(--stagger-skew-x));
+  --mul-skew-y: calc(1 + var(--dist) * var(--stagger-skew-y));
+  --mul-rotate: calc(1 + var(--dist) * var(--stagger-rotate));
+  --mul-scale: calc(1 + var(--dist) * var(--stagger-scale));
   transform:
     translateY(
       calc(-100% * (
@@ -250,12 +271,12 @@ section.effect-unified.slice-horizontal .slice-wrapper {
         ((var(--p-assemble) * var(--max-amount)) * (0.5 - (0.5 / var(--slice-count))))
       ))
     )
-    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
-    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
-    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
-    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
-    rotate(calc(var(--p-rotate) * var(--max-rotate)))
-    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1)));
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x) * var(--mul-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y) * var(--mul-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x) * var(--mul-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y) * var(--mul-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate) * var(--mul-rotate)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1) * var(--mul-scale)));
 }
 section.effect-unified.slice-horizontal .slice-content {
   position: absolute;
@@ -295,13 +316,20 @@ section.effect-unified.slice-concentric .circle-content {
   /* Multiplier decreases towards center: (circleCount-idx-1)/(circleCount-1) */
   --circle-mul-denom: max(1, calc(var(--circle-count, 8) - 1));
   --circle-mul: calc((var(--circle-count, 8) - var(--circle-index) - 1) / var(--circle-mul-denom));
+  --dist: var(--circle-distance, var(--circle-mul));
+  --mul-translate-x: calc(1 + var(--dist) * var(--stagger-translate-x));
+  --mul-translate-y: calc(1 + var(--dist) * var(--stagger-translate-y));
+  --mul-skew-x: calc(1 + var(--dist) * var(--stagger-skew-x));
+  --mul-skew-y: calc(1 + var(--dist) * var(--stagger-skew-y));
+  --mul-rotate: calc(1 + var(--dist) * var(--stagger-rotate));
+  --mul-scale: calc(1 + var(--dist) * var(--stagger-scale));
   transform:
-    translateX(calc(var(--p-translate-x) * var(--max-translate-x)))
-    translateY(calc(var(--p-translate-y) * var(--max-translate-y)))
-    skewX(calc(var(--p-skew-x) * var(--max-skew-x)))
-    skewY(calc(var(--p-skew-y) * var(--max-skew-y)))
-    rotate(calc(var(--p-rotate) * var(--max-rotate) * var(--circle-mul)))
-    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1) * var(--circle-mul)));
+    translateX(calc(var(--p-translate-x) * var(--max-translate-x) * var(--mul-translate-x)))
+    translateY(calc(var(--p-translate-y) * var(--max-translate-y) * var(--mul-translate-y)))
+    skewX(calc(var(--p-skew-x) * var(--max-skew-x) * var(--mul-skew-x)))
+    skewY(calc(var(--p-skew-y) * var(--max-skew-y) * var(--mul-skew-y)))
+    rotate(calc(var(--p-rotate) * var(--max-rotate) * var(--circle-mul) * var(--mul-rotate)))
+    scale(calc(1 + var(--p-scale) * (var(--max-scale) - 1) * var(--circle-mul) * var(--mul-scale)));
 }
 section.effect-unified.slice-concentric .circle-text {
   position: absolute;
