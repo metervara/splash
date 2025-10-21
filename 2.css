@@ -1,17 +1,19 @@
 :root {
-  --bg: #1a1a2e;
+  --bg: #340fc7; /*#1a1a2e;*/
 
-  --letter-0-text: #e94560; /* vivid red */
-  --letter-1-text: #3a0ca3; /* deep indigo */
-  --letter-2-text: #b5179e; /* magenta */
-  --letter-3-text: #1e4ed8; /* clean blue */
-  --letter-4-text: #f72585; /* hot pink */
-  --letter-5-text: #480ca8; /* royal purple */
-  --letter-6-text: #7209b7; /* violet */
-  --letter-7-text: #4f46e5; /* indigo-blue */
-  --letter-8-text: #9959ff; /* bright purple */
+  --end-color: #340fc7; /*#f72585;*/
+  --start-color: #02beab; /*#3a0ca3;*/
 
-  /* --sections: 9; */
+  /* --letter-0-text: #e94560;
+  --letter-1-text: #3a0ca3;
+  --letter-2-text: #b5179e;
+  --letter-3-text: #1e4ed8;
+  --letter-4-text: #f72585;
+  --letter-5-text: #480ca8;
+  --letter-6-text: #7209b7;
+  --letter-7-text: #4f46e5;
+  --letter-8-text: #9959ff; */
+
 }
 
 html,
@@ -58,37 +60,31 @@ section {
 }
 
 section:nth-child(1) {
-  color: var(--letter-0-text);
+  color: color-mix(in oklch, var(--start-color) 100%, var(--end-color) 0%);
 }
-
 section:nth-child(2) {
-  color: var(--letter-1-text);
+  color: color-mix(in oklch, var(--start-color) 87.5%, var(--end-color) 12.5%);
 }
-
 section:nth-child(3) {
-  color: var(--letter-2-text);
+  color: color-mix(in oklch, var(--start-color) 75%, var(--end-color) 25%);
 }
-
 section:nth-child(4) {
-  color: var(--letter-3-text);
+  color: color-mix(in oklch, var(--start-color) 62.5%, var(--end-color) 37.5%);
 }
 section:nth-child(5) {
-  color: var(--letter-4-text);
+  color: color-mix(in oklch, var(--start-color) 50%, var(--end-color) 50%);
 }
-
 section:nth-child(6) {
-  color: var(--letter-5-text);
+  color: color-mix(in oklch, var(--start-color) 37.5%, var(--end-color) 62.5%);
 }
-
 section:nth-child(7) {
-  color: var(--letter-6-text);
+  color: color-mix(in oklch, var(--start-color) 25%, var(--end-color) 75%);
 }
-
 section:nth-child(8) {
-  color: var(--letter-7-text);
+  color: color-mix(in oklch, var(--start-color) 12.5%, var(--end-color) 87.5%);
 }
 section:nth-child(9) {
-  color: var(--letter-8-text);
+  color: color-mix(in oklch, var(--start-color) 0%, var(--end-color) 100%);
 }
 
 .letter {
@@ -105,9 +101,9 @@ section:nth-child(9) {
   --rot: 0deg;
   --skx: 0deg;
   --sky: 0deg;
-  --tx: 0px;         /* subtle drift */
+  --tx: 0px; /* subtle drift */
   --ty: 0px;
-  --pivot-x: 50%;    /* transform origin */
+  --pivot-x: 50%; /* transform origin */
   --pivot-y: 50%;
 
   transform-origin: var(--pivot-x) var(--pivot-y);
@@ -208,19 +204,11 @@ section:nth-child(9) > .letter {
 
 @keyframes scale-up {
   from {
-    transform:
-      translate(0, 0)
-      rotate(0deg)
-      skew(0deg, 0deg)
-      scale(1);
+    transform: translate(0, 0) rotate(0deg) skew(0deg, 0deg) scale(1);
   }
   to {
     /* transform: scale(2); */
-    transform: 
-      translate(var(--tx), var(--ty))
-      rotate(var(--rot))
-      skew(var(--skx), var(--sky))
-      scale(var(--end-scale));
-    
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot))
+      skew(var(--skx), var(--sky)) scale(var(--end-scale));
   }
 }
