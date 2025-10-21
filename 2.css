@@ -1,18 +1,8 @@
 :root {
-  --bg: #340fc7; /*#1a1a2e;*/
+  /* --bg: #340fc7; */
 
-  --end-color: #340fc7; /*#f72585;*/
-  --start-color: #02beab; /*#3a0ca3;*/
-
-  /* --letter-0-text: #e94560;
-  --letter-1-text: #3a0ca3;
-  --letter-2-text: #b5179e;
-  --letter-3-text: #1e4ed8;
-  --letter-4-text: #f72585;
-  --letter-5-text: #480ca8;
-  --letter-6-text: #7209b7;
-  --letter-7-text: #4f46e5;
-  --letter-8-text: #9959ff; */
+  --end-color: #340fc7;
+  --start-color: #02beab;
 
 }
 
@@ -32,8 +22,8 @@ body {
   margin: 0;
   padding: 0;
 
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--end-color);
+  color: var(--start-color);
 }
 
 main {
@@ -88,25 +78,33 @@ section:nth-child(9) {
 }
 
 .letter {
-  animation-name: scale-up;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-  animation-iteration-count: 1;
+  animation: none;
+}
 
-  animation-timeline: scroll(root block);
+@supports (animation-timeline: scroll(root block)) {
+  .letter {
+    --end-scale: calc(1 + (1 - var(--start-p, 0)) * 2);
+    --rot: 0deg;
+    --skx: 0deg;
+    --sky: 0deg;
+    --tx: 0px; /* subtle drift */
+    --ty: 0px;
+    --pivot-x: 50%; /* transform origin */
+    --pivot-y: 50%;
 
-  animation-range-end: 100%;
+    animation-name: scale-up;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-iteration-count: 1;
+    animation-timeline: scroll(root block);
+    animation-range-end: 100%;
 
-  --end-scale: calc(1 + (1 - var(--start-p, 0)) * 2);
-  --rot: 0deg;
-  --skx: 0deg;
-  --sky: 0deg;
-  --tx: 0px; /* subtle drift */
-  --ty: 0px;
-  --pivot-x: 50%; /* transform origin */
-  --pivot-y: 50%;
+    transform-origin: var(--pivot-x) var(--pivot-y);
+  }
 
-  transform-origin: var(--pivot-x) var(--pivot-y);
+  #unsupported-overlay {
+    display: none;
+  }
 }
 
 section:nth-child(1) > .letter {

@@ -4,10 +4,7 @@
   --secondary-text: white;
 }
 
-#splash-overlay {
-  position: fixed;
-  top: 16px;
-  left: 16px;
+.overlay {
   z-index: 10;
   padding: 8px 12px;
   background: var(--secondary-bg);
@@ -21,9 +18,22 @@
   transition: background-color 150ms linear, color 150ms linear;
 }
 
-#splash-overlay:hover {
+.overlay:hover {
   background: var(--secondary-text);
   color: var(--secondary-bg);
 }
+
+#splash-overlay {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+}
+
+#unsupported-overlay {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+}
+
 
 
