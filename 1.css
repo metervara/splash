@@ -12,31 +12,6 @@
   /* Letter color combinations */
   --letter-0-bg: #1a1a2e;
   --letter-0-text: #e94560;
-  
-  --letter-1-bg: #16213e;
-  --letter-1-text: #0f3460;
-  
-  --letter-2-bg: #0f3460;
-  --letter-2-text: #533483;
-  
-  --letter-3-bg: #533483;
-  --letter-3-text: #7209b7;
-  
-  --letter-4-bg: #7209b7;
-  --letter-4-text: #f72585;
-  
-  --letter-5-bg: #f72585;
-  --letter-5-text: #b5179e;
-  
-  --letter-6-bg: #b5179e;
-  --letter-6-text: #480ca8;
-  
-  --letter-7-bg: #480ca8;
-  --letter-7-text: #3a0ca3;
-  
-  --letter-8-bg: #3a0ca3;
-  --letter-8-text: #4361ee;
-
 }
 
 html, body {
@@ -89,55 +64,6 @@ main {
   background-color: var(--letter-0-bg);
   color: var(--letter-0-text);
 }
-
-/* Letter-specific colors */
-/*
-main.active-letter-0 {
-  background-color: var(--letter-0-bg);
-  color: var(--letter-0-text);
-}
-
-main.active-letter-1 {
-  background-color: var(--letter-1-bg);
-  color: var(--letter-1-text);
-}
-
-main.active-letter-2 {
-  background-color: var(--letter-2-bg);
-  color: var(--letter-2-text);
-}
-
-main.active-letter-3 {
-  background-color: var(--letter-3-bg);
-  color: var(--letter-3-text);
-}
-
-main.active-letter-4 {
-  background-color: var(--letter-4-bg);
-  color: var(--letter-4-text);
-}
-
-main.active-letter-5 {
-  background-color: var(--letter-5-bg);
-  color: var(--letter-5-text);
-}
-
-main.active-letter-6 {
-  background-color: var(--letter-6-bg);
-  color: var(--letter-6-text);
-}
-
-main.active-letter-7 {
-  background-color: var(--letter-7-bg);
-  color: var(--letter-7-text);
-}
-
-main.active-letter-8 {
-  background-color: var(--letter-8-bg);
-  color: var(--letter-8-text);
-}
-*/
-
 /* Unified slices effect */
 /* Base hook */
 section.effect-unified .letter {
