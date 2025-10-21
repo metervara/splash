@@ -4,7 +4,7 @@
 
 ### M
 
-# Example
+# Example options
 <section 
   data-effect="slices"
   data-slice-type="vertical"        <!-- 'vertical' | 'horizontal' | 'concentric' -->
@@ -24,9 +24,8 @@
   data-scale-mode="abs"
 >
 
+## Stagger options 
 data-stagger-scale
 data-stagger-rotate
 data-stagger-translate-x, data-stagger-translate-y
 data-stagger-skew-x, data-stagger-skew-y
-  <div id="letter-X" class="letter">X</div>
-</section>
