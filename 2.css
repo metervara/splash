@@ -1,6 +1,6 @@
 :root {
   --bg: #1a1a2e;
-  
+
   --letter-0-text: #e94560;
   --letter-1-text: #0f3460;
   --letter-2-text: #533483;
@@ -14,20 +14,22 @@
   /* --sections: 9; */
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
 body {
   margin: 0;
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
 
   font-size: min(100vw, 100vh);
   font-weight: 700;
   line-height: 1;
   margin: 0;
   padding: 0;
-  
+
   background-color: var(--bg);
   color: var(--text);
 }
@@ -43,8 +45,8 @@ section {
   height: 100lvh;
 
   position: sticky;
-  top: 0; 
-  
+  top: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,35 +93,134 @@ section:nth-child(9) {
 
 .letter {
   animation-name: scale-up;
-  animation-duration: 900ms;              /* acts as the “progress span” */
   animation-timing-function: linear;
-  animation-fill-mode: both;           /* keep start/end states */
+  animation-fill-mode: both;
   animation-iteration-count: 1;
 
-  /* animation-timeline: --panel;     */
   animation-timeline: scroll(root block);
-  
+
   animation-range-end: 100%;
 
-  --end-scale: calc(1 + (1 - var(--start-p, 0)) * 2.0)
+  --end-scale: calc(1 + (1 - var(--start-p, 0)) * 2);
+  --rot: 0deg;
+  --skx: 0deg;
+  --sky: 0deg;
+  --tx: 0px;         /* subtle drift */
+  --ty: 0px;
+  --pivot-x: 50%;    /* transform origin */
+  --pivot-y: 50%;
+
+  transform-origin: var(--pivot-x) var(--pivot-y);
 }
 
-section:nth-child(1) > .letter { --start-p: 0;     animation-range-start: 0%;    }
-section:nth-child(2) > .letter { --start-p: 0.125; animation-range-start: 12.5%; }
-section:nth-child(3) > .letter { --start-p: 0.25;  animation-range-start: 25%;   }
-section:nth-child(4) > .letter { --start-p: 0.375; animation-range-start: 37.5%; }
-section:nth-child(5) > .letter { --start-p: 0.5;   animation-range-start: 50%;   }
-section:nth-child(6) > .letter { --start-p: 0.625; animation-range-start: 62.5%; }
-section:nth-child(7) > .letter { --start-p: 0.75;  animation-range-start: 75%;   }
-section:nth-child(8) > .letter { --start-p: 0.875; animation-range-start: 87.5%; }
-section:nth-child(9) > .letter { animation: none; transform: none; }
+section:nth-child(1) > .letter {
+  --start-p: 0;
+  --rot: -8deg;
+  --skx: 8deg;
+  --sky: -12deg;
+  --tx: -6px;
+  --ty: 2px;
+  --pivot-x: 40%;
+  --pivot-y: 60%;
+  animation-range-start: 0%;
+}
+section:nth-child(2) > .letter {
+  --start-p: 0.125;
+  --rot: 6deg;
+  --skx: -15deg;
+  --sky: 5deg;
+  --tx: 5px;
+  --ty: -3px;
+  --pivot-x: 55%;
+  --pivot-y: 40%;
+  animation-range-start: 12.5%;
+}
+section:nth-child(3) > .letter {
+  --start-p: 0.25;
+  --rot: -4deg;
+  --skx: 6deg;
+  --sky: 9deg;
+  --tx: -3px;
+  --ty: 1px;
+  --pivot-x: 60%;
+  --pivot-y: 50%;
+  animation-range-start: 25%;
+}
+section:nth-child(4) > .letter {
+  --start-p: 0.375;
+  --rot: 10deg;
+  --skx: -10deg;
+  --sky: -6deg;
+  --tx: 4px;
+  --ty: 4px;
+  --pivot-x: 45%;
+  --pivot-y: 55%;
+  animation-range-start: 37.5%;
+}
+section:nth-child(5) > .letter {
+  --start-p: 0.5;
+  --rot: -12deg;
+  --skx: 6deg;
+  --sky: 1deg;
+  --tx: -5px;
+  --ty: -2px;
+  --pivot-x: 50%;
+  --pivot-y: 50%;
+  animation-range-start: 50%;
+}
+section:nth-child(6) > .letter {
+  --start-p: 0.625;
+  --rot: 7deg;
+  --skx: -12deg;
+  --sky: 2deg;
+  --tx: 6px;
+  --ty: 0px;
+  --pivot-x: 42%;
+  --pivot-y: 58%;
+  animation-range-start: 62.5%;
+}
+section:nth-child(7) > .letter {
+  --start-p: 0.75;
+  --rot: -6deg;
+  --skx: 5deg;
+  --sky: -15deg;
+  --tx: -2px;
+  --ty: 3px;
+  --pivot-x: 58%;
+  --pivot-y: 45%;
+  animation-range-start: 75%;
+}
+section:nth-child(8) > .letter {
+  --start-p: 0.875;
+  --rot: 9deg;
+  --skx: -12deg;
+  --sky: 6deg;
+  --tx: 3px;
+  --ty: -4px;
+  --pivot-x: 52%;
+  --pivot-y: 48%;
+  animation-range-start: 87.5%;
+}
+section:nth-child(9) > .letter {
+  animation: none;
+  transform: none;
+}
 
 @keyframes scale-up {
   from {
-    transform: scale(1);
+    transform:
+      translate(0, 0)
+      rotate(0deg)
+      skew(0deg, 0deg)
+      scale(1);
   }
   to {
     /* transform: scale(2); */
-    transform: scale(var(--end-scale));
+    transform: 
+      translate(var(--tx), var(--ty))
+      rotate(var(--rot))
+      skew(var(--skx), var(--sky))
+      scale(var(--end-scale));
+    
   }
 }
