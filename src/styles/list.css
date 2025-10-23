@@ -126,6 +126,18 @@ nav a {
   background: var(--nav-link-bg-color);
 }
 
+/* Flattened page list: inline items with bullet separators */
+#page { list-style: none; margin: 0; padding: 0; }
+#page > li { display: inline; }
+#page > li + li::before {
+  content: var(--bullet);
+  margin-inline: var(--gap);
+  color: var(--bullet-color);
+}
+
+/* Restore original nav link styling via class */
+.nav-link { color: var(--nav-link-color); background: var(--nav-link-bg-color); }
+
 /* Header/title + nav: collapse inline whitespace and add bullet before nav */
 header { display: inline-flex; align-items: baseline; }
 header > nav { display: inline-flex; align-items: baseline; }

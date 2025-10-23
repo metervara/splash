@@ -26,9 +26,8 @@ function getDisplayName(path: string): string {
 }
 
 (async () => {
-	const statusEl = document.getElementById('status');
-	const listEl = document.getElementById('list');
-	if (!listEl) return;
+    const pageEl = document.getElementById('page');
+    if (!pageEl) return;
 
   const STORAGE_KEY = 'visited-links';
   function getVisited(): Set<string> {
@@ -48,14 +47,15 @@ function getDisplayName(path: string): string {
   }
   const visited = getVisited();
 
-	const items = await loadManifest();
-	if (items.length === 0) {
-		if (statusEl) statusEl.textContent = 'No splashes found.';
-		return;
-	}
-	if (statusEl) statusEl.remove();
+    const items = await loadManifest();
+    if (items.length === 0) return;
 
-	const ul = listEl as HTMLUListElement;
+    const ul = pageEl as HTMLUListElement;
+    
+		// const countLi = document.createElement('li');
+    // countLi.textContent = `Count: ${items.length}`;
+    // ul.appendChild(countLi);
+
 	for (let i = 0; i < items.length; i++) {
 		const entry = items[i];
 		const href = toHref(entry);
