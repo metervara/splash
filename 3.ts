@@ -75,8 +75,6 @@ const writeText = async(text: string, target: HTMLElement, loop: boolean = false
 					} else {
 						target.textContent = (target.textContent ?? '') + nextChar;
 					}
-					const scroller = document.scrollingElement || document.documentElement;
-					scroller.scrollTop = scroller.scrollHeight;
 				}
 				if (!loop || cancelled) break;
 				await sleep(speed);
@@ -126,7 +124,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await initSplashOverlay();
 	await updateHeaderWithManifest();
 
-  const scroller = document.scrollingElement || document.documentElement;
+	const scroller = document.scrollingElement || document.documentElement;
+
+	// Observe container height changes and scroll to bottom when it grows
+	const container = document.querySelector('div.container') as HTMLElement | null;
+	if (container && 'ResizeObserver' in window) {
+		let prevHeight = container.offsetHeight;
+		const ro = new ResizeObserver(entries => {
+			for (const entry of entries) {
+				const newHeight = entry.target instanceof HTMLElement ? entry.target.offsetHeight : prevHeight;
+				if (newHeight > prevHeight) {
+					scroller.scrollTop = scroller.scrollHeight;
+				}
+				prevHeight = newHeight;
+			}
+		});
+		ro.observe(container);
+	}
 
   // Inputting command
   const commandElement = document.createElement('p'); 
