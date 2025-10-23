@@ -5,6 +5,14 @@ export function selectRandom<T>(items: readonly T[]): T | undefined {
 }
 
 
+type ManifestEntry = string | { href: string; title?: string };
+
+function toHref(entry: ManifestEntry): string | null {
+	if (typeof entry === 'string') return entry;
+	if (entry && typeof entry.href === 'string') return entry.href;
+	return null;
+}
+
 /** Initialize and inject the shared splash overlay using splash-manifest.json. */
 export async function initSplashOverlay(): Promise<void> {
 	// Remove any pre-existing overlay to ensure a single instance
@@ -28,7 +36,8 @@ export async function initSplashOverlay(): Promise<void> {
 	try {
 		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
 		if (!res.ok) throw new Error(String(res.status));
-		const manifest = (await res.json()) as string[];
+		const manifestRaw = (await res.json()) as ManifestEntry[];
+		const manifest = manifestRaw.map(toHref).filter((h): h is string => typeof h === 'string');
 		const total = Array.isArray(manifest) ? manifest.length : 0;
 		const path = window.location.pathname;
 		let idx = manifest.indexOf(path);
@@ -42,9 +51,19 @@ export async function initSplashOverlay(): Promise<void> {
 		const totalDisplay = total > 0 ? total : 1;
 		textBlock.textContent = `#${displayIndex} / ${totalDisplay}`;
 
-		// Random excludes current index if we have one
-		randomLink.href = `/index.html?exclude=${idx >= 0 ? idx : ''}`;
+		// Random: navigate directly to a random splash (excluding current)
+		randomLink.href = '#';
 		randomLink.setAttribute('aria-label', 'Random splash');
+		randomLink.addEventListener('click', (e) => {
+			e.preventDefault();
+			if (!Array.isArray(manifest) || manifest.length === 0) return;
+			const pool = manifest.map((_, i) => i).filter((i) => i !== safeIdx);
+			const chosenIdx = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : safeIdx;
+			const target = manifest[chosenIdx];
+			if (typeof target === 'string' && target.length > 0) {
+				window.location.href = target;
+			}
+		});
 
 		// Prev/Next with wrap-around
 		const prevIdx = total > 0 ? (safeIdx - 1 + total) % total : 0;

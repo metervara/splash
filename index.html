@@ -3,20 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Metervara Splash</title>
+    <title>Metervara Covers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/styles/reset.css">
-    <style>
-      body { display: grid; place-items: center; min-height: 100dvh; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; }
-      .card { text-align: center; padding: 2rem; opacity: .8; }
-      .muted { color: #777; font-size: .9rem; margin-top: .5rem; }
-    </style>
+    <link rel="stylesheet" href="/src/styles/list.css">
   </head>
   <body>
-    <div class="card">
-      <noscript>JavaScript is required to load a random splash.</noscript>
-      <div id="status" class="muted">Loading a splash from /…</div>
-    </div>
-    <script type="module" src="/src/index.ts"></script>
+    <header>
+      <h1>Metervara Covers</h1>
+      <nav>
+        <ul>
+          <li><a href="/random.html">Random</a></li>
+        </ul>
+      </nav>
+    </header>
+    <p id="status">Loading…</p>
+    <ul id="list"></ul>
+    <script type="module" src="/src/list.ts"></script>
   </body>
   </html>
 
