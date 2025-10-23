@@ -6,10 +6,6 @@
 
 .overlay {
   z-index: 10;
-  padding: 8px 12px;
-  background: var(--secondary-bg);
-  color: var(--secondary-text);
-  text-decoration: none;
   font-size: 12px;
   line-height: 1;
   letter-spacing: 0.02em;
@@ -18,7 +14,43 @@
   transition: background-color 150ms linear, color 150ms linear;
 }
 
-.overlay:hover {
+/* Itemized overlay container (our injected control strip) */
+.overlay:not(a) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  padding: 0;
+}
+
+/* Standalone anchor-style overlay (e.g. #unsupported-overlay) */
+/* a.overlay {
+  padding: 8px 12px;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  text-decoration: none;
+}
+
+a.overlay:hover {
+  background: var(--secondary-text);
+  color: var(--secondary-bg);
+} */
+
+.overlay a,
+.overlay a:visited {
+  /* color: inherit; */
+  text-decoration: none;
+}
+
+/* Each item gets its own background and padding so gaps are visible */
+.overlay * {
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  padding: 8px 10px;
+}
+
+/* Hover individually for links inside the overlay strip */
+.overlay a:hover {
   background: var(--secondary-text);
   color: var(--secondary-bg);
 }
