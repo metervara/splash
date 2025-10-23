@@ -2,7 +2,7 @@
 // Simple manifest generator: scans root for *.html files (excluding index.html and random.html)
 // and writes public/splash-manifest.json as [{ href, title }].
 
-const { readdirSync, readFileSync, writeFileSync } = require('node:fs');
+const { readdirSync, readFileSync, writeFileSync, mkdirSync } = require('node:fs');
 const { join } = require('node:path');
 
 function extractTitle(html) {
@@ -25,7 +25,9 @@ function main() {
 			return { href: `/${name}`, title };
 		});
 
-	const outPath = join(root, 'public', 'splash-manifest.json');
+	const publicDir = join(root, 'public');
+	mkdirSync(publicDir, { recursive: true });
+	const outPath = join(publicDir, 'splash-manifest.json');
 	writeFileSync(outPath, JSON.stringify(entries, null, 2) + '\n', 'utf8');
 	console.log(`Wrote ${entries.length} entries to public/splash-manifest.json`);
 }
