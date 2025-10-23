@@ -12,15 +12,18 @@ body {
   margin: 0;
   height: auto;
   min-height: 100%;
-  display: flow-root;
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
   color: var(--text-color);
-  /* display: grid;
-  place-items: center;
-  text-align: center; */
-
   background-color: var(--margin-color);
+  
+  font-family: 'IBM Plex Mono', 'IBM Plex Mono', monospace;
   text-transform: uppercase;
+
+  ascent-override: 88%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+  size-adjust: 100%;
+
 
   padding: 4vw 4vw 0 4vw;
 }
@@ -38,17 +41,23 @@ header {
 h1, h2, hr, h4, h5, p, span.cursor {
   margin: 0;
   padding: 0;
+
   font-weight: 400;
-  font-size: 3.6vw; /*clamp(2.5rem, 8vw, 8rem); */
-  line-height: 1.27;
-  letter-spacing: 0.02em;
+  font-size: 3.75vw; /*clamp(2.5rem, 8vw, 8rem); */
+  line-height: 1.26;
+  
   /* Allow long unbroken strings to wrap within viewport */
   overflow-wrap: anywhere;
   word-break: break-word;
+  letter-spacing: 0.01em;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-optical-sizing: none;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
 }
 
 div.container {
-  /* margin: 4vw; */
   background-color: var(--bg-color);
   box-sizing: border-box;
   margin: 0;
