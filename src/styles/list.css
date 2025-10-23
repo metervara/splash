@@ -2,7 +2,7 @@
   --gap: 0.5em; 
   --line-height: 1.5;
   --bullet: "♦";  /* ○ ⦾ ● • ❏ ❐ ❑ ❒ ❖ ❘ ❙ ❚ ❛ ❜ ❝ ❞ ❡ ❢ ❣ ♥ ♦ ♣ ♠ ♦ ♣ ♠ */
-  --bullet-color: rgb(0, 234, 207);
+  --bullet-color:#aaaaff; /* rgb(0, 234, 207); */
   --font-size: 4vw; 
 
   --text-color: blue;
@@ -12,7 +12,7 @@
   --link-bg-color: #ffffaa;
 
   --nav-link-color: blue;
-  --nav-link-bg-color: #ffcccc;
+  --nav-link-bg-color: #aaffcc;
   
   --link-hover-color: white;
   --link-hover-bg-color: blue;
@@ -54,7 +54,7 @@ h1, h2, h3, h4, h5, h6, p, span {
 }
 
 /* Uniform gaps between any adjacent elements */
-* + * { margin-left: var(--gap); }
+/* * + * { margin-left: var(--gap); } */
 
 /* Lists as inline with custom delimiter bullets */
 ul, ol {
@@ -125,6 +125,17 @@ nav a {
   color: var(--nav-link-color);
   background: var(--nav-link-bg-color);
 }
+
+/* Header/title + nav: collapse inline whitespace and add bullet before nav */
+header { display: inline-flex; align-items: baseline; }
+header > nav { display: inline-flex; align-items: baseline; }
+header > nav::before {
+  content: var(--bullet);
+  margin-inline: var(--gap);
+  color: var(--bullet-color);
+}
+/* Avoid duplicate bullets from wrapper-based rules inside header nav */
+header nav :where(ul, ol) > li:first-child::before { content: none; margin: 0; }
 
 /* a:visited {
   color: var(--link-visited-color);
