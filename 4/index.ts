@@ -1,6 +1,4 @@
-
-
-import { initSplashOverlay } from './src/shared/utils';
+import { initSplashOverlay } from '/src/shared/utils';
 
 const writeSpeed = 200;
 const runSpeed = 30;
@@ -36,7 +34,7 @@ async function updateHeaderWithManifest(): Promise<void> {
 		if (!res.ok) throw new Error(String(res.status));
 		const manifest = (await res.json()) as string[];
 		const total = Array.isArray(manifest) ? manifest.length : 0;
-		h2!.textContent = `#3 - Ascii maze. Total: ${total}`;
+		h2!.textContent = `#4 - Ascii maze. Total: ${total}`;
 	} catch {
 		console.error('Failed to fetch splash manifest');
 	}
@@ -142,29 +140,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 		ro.observe(container);
 	}
 
-  // Inputting command
-  const commandElement = document.createElement('p'); 
-  document.querySelector('main')?.appendChild(commandElement);
+	// Inputting command
+	const commandElement = document.createElement('p'); 
+	document.querySelector('main')?.appendChild(commandElement);
 	await writeText('10 PRINT CHR$(205.5 + RND(1)); : GOTO 10', commandElement, false, writeSpeed, false, true);
 
-  //Run command
-  const runElement = document.createElement('p'); 
-  document.querySelector('main')?.appendChild(runElement);
+	//Run command
+	const runElement = document.createElement('p'); 
+	document.querySelector('main')?.appendChild(runElement);
 	await writeText('RUN', runElement, false, writeSpeed, false, true);
 
-  //Maze loop (program executing forever)
-  const executeElement = document.createElement('p'); 
-  document.querySelector('main')?.appendChild(executeElement);
+	//Maze loop (program executing forever)
+	const executeElement = document.createElement('p'); 
+	document.querySelector('main')?.appendChild(executeElement);
 	await writeText('╱╲', executeElement, true, runSpeed, true, true);
 
-  const breakElement = document.createElement('p');
-  document.querySelector('main')?.appendChild(breakElement);
-  breakElement.innerText = "BREAK IN 10"
+	const breakElement = document.createElement('p');
+	document.querySelector('main')?.appendChild(breakElement);
+	breakElement.innerText = "BREAK IN 10"
 
-  const endElement = document.createElement('p');
-  document.querySelector('main')?.appendChild(endElement);
-  endElement.innerText = "Ready."
+	const endElement = document.createElement('p');
+	document.querySelector('main')?.appendChild(endElement);
+	endElement.innerText = "Ready."
 
-  placeCursorIn(endElement);
-  showCursor();
+	placeCursorIn(endElement);
+	showCursor();
 });
+
+

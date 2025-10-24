@@ -35,7 +35,7 @@ export async function initSplashOverlay(): Promise<void> {
 
 	const listLink = document.createElement('a');
 	listLink.textContent = 'list';
-	listLink.href = '/index.html';
+	listLink.href = '/';
 	listLink.setAttribute('aria-label', 'List');
 
 	try {
@@ -45,10 +45,17 @@ export async function initSplashOverlay(): Promise<void> {
 		const manifest = manifestRaw.map(toHref).filter((h): h is string => typeof h === 'string');
 		const total = Array.isArray(manifest) ? manifest.length : 0;
 		const path = window.location.pathname;
-		let idx = manifest.indexOf(path);
-		if (idx < 0) {
-			const base = '/' + (path.split('/')[path.split('/').length - 1] || '');
-			idx = manifest.indexOf(base);
+		function normalizeCandidates(p: string): string[] {
+			const withoutIndex = p.replace(/index\.html$/i, '');
+			const ensureSlash = withoutIndex.endsWith('/') ? withoutIndex : withoutIndex + '/';
+			const noSlash = ensureSlash.replace(/\/$/, '');
+			return [p, withoutIndex, ensureSlash, noSlash];
+		}
+		let idx = -1;
+		const candidates = normalizeCandidates(path);
+		for (const c of candidates) {
+			const found = manifest.indexOf(c);
+			if (found >= 0) { idx = found; break; }
 		}
 
 		const safeIdx = idx >= 0 ? idx : 0;

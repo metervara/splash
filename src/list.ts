@@ -21,8 +21,8 @@ function toTitle(entry: ManifestEntry): string {
 }
 
 function getDisplayName(path: string): string {
-	const base = path.replace(/^\/+/, '').replace(/\.html$/, '');
-	return base;
+    const base = path.replace(/^\/+/, '').replace(/\.html$/, '').replace(/\/$/, '');
+    return base;
 }
 
 (async () => {

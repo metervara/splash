@@ -3,18 +3,18 @@ import fs from 'fs';
 import path from 'path';
 
 function scanRootSplashHtmlFiles(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string }[] {
-	const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
-	return entries
-		.filter((e) => e.isFile() && e.name.endsWith('.html') && e.name.toLowerCase() !== 'index.html' && e.name.toLowerCase() !== 'random.html')
-		.map((e) => {
-			const absPath = path.resolve(projectRoot, e.name);
-			const baseName = e.name.replace(/\.html$/i, '');
-			const html = fs.readFileSync(absPath, 'utf8');
-			const m = html.match(/<title>([^<]*)<\/title>/i);
-			const title = m ? m[1].trim() : baseName;
-			return { name: `splash_${baseName}`, absPath, urlPath: `/${e.name}`, title };
-		})
-		.sort((a, b) => a.urlPath.localeCompare(b.urlPath));
+    // Scan numeric directories for index.html
+    const dirEntries = fs.readdirSync(projectRoot, { withFileTypes: true })
+        .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
+        .map((d) => d.name)
+        .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    return dirEntries.map((dir) => {
+        const indexPath = path.resolve(projectRoot, dir, 'index.html');
+        const html = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf8') : '';
+        const m = html.match(/<title>([^<]*)<\/title>/i);
+        const title = m ? m[1].trim() : dir;
+        return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title };
+    });
 }
 
 function writeSplashManifest(projectRoot: string, pages: { urlPath: string; title: string }[]): void {
@@ -23,7 +23,7 @@ function writeSplashManifest(projectRoot: string, pages: { urlPath: string; titl
 		fs.mkdirSync(publicDir, { recursive: true });
 	}
 	const manifestPath = path.resolve(publicDir, 'splash-manifest.json');
-	const payload = pages.map((p) => ({ href: p.urlPath, title: p.title }));
+    const payload = pages.map((p) => ({ href: p.urlPath, title: p.title }));
 	fs.writeFileSync(manifestPath, JSON.stringify(payload, null, 2) + '\n');
 }
 
@@ -32,14 +32,15 @@ function generateSplashManifestPlugin() {
 		name: 'generate-splash-manifest',
 		apply: 'serve',
 		configureServer(server: any) {
-			const root = server.config.root;
-				const pages = scanRootSplashHtmlFiles(root);
+            const root = server.config.root;
+            const pages = scanRootSplashHtmlFiles(root);
 			writeSplashManifest(root, pages);
 			// Watch for changes and update manifest
-				fs.watch(root, { persistent: false }, () => {
-					const updatedPages = scanRootSplashHtmlFiles(root);
-					writeSplashManifest(root, updatedPages);
-				});
+            fs.watch(root, { persistent: false }, () => {
+                const updatedPages = scanRootSplashHtmlFiles(root);
+                writeSplashManifest(root, updatedPages);
+            });
+            // No rewrite needed when using folders with index.html during dev
 		},
 	};
 }
@@ -65,16 +66,20 @@ export default defineConfig(({ command }) => {
 		input[page.name] = page.absPath;
 	}
 
-	return {
-		plugins: [generateSplashManifestPlugin(), generateSplashManifestBuildPlugin()],
-		build: {
+    return {
+        plugins: [
+            generateSplashManifestPlugin(),
+            generateSplashManifestBuildPlugin(),
+        ],
+        build: {
 			rollupOptions: {
 				input,
 			},
-		},
-		server: {
-			open: '/index.html',
-		},
+            outDir: 'dist',
+        },
+        server: {
+            open: '/index.html',
+        },
 	};
 });
 

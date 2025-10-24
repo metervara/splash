@@ -16,9 +16,9 @@ async function pickRandomSplash(): Promise<string | null> {
 		const params = new URLSearchParams(window.location.search);
 		const excludeStr = params.get('exclude');
 		const excludeIdx = Number.isFinite(parseInt(excludeStr || '', 10)) ? parseInt(excludeStr || '', 10) : -1;
-		let pool = list
-			.map((entry, idx) => ({ href: toHref(entry), idx }))
-			.filter((item) => typeof item.href === 'string' && (item.href as string).endsWith('.html'));
+    let pool = list
+            .map((entry, idx) => ({ href: toHref(entry), idx }))
+            .filter((item) => typeof item.href === 'string');
 		if (excludeIdx >= 0 && excludeIdx < list.length) {
 			const filtered = pool.filter((item) => item.idx !== excludeIdx);
 			if (filtered.length > 0) pool = filtered;

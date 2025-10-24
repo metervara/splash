@@ -4,12 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "predev": "npm run manifest",
     "dev": "vite",
-    "prebuild": "npm run manifest",
     "build": "vite build",
-    "preview": "vite preview --open",
-    "manifest": "node scripts/generate-manifest.js"
+    "preview": "vite preview --open"
   },
   "keywords": [],
   "author": "",

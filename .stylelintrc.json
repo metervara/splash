@@ -1,0 +1,9 @@
+{
+  "ignoreFiles": [
+    "scripts/**/*.js",
+    "scripts/**/*.cjs",
+    "dist/**"
+  ]
+}
+
+
