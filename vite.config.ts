@@ -2,14 +2,15 @@ import { defineConfig } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
-function scanRootSplashHtmlFiles(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string }[] {
-    // Scan numeric directories for index.html
-    const dirEntries = fs.readdirSync(projectRoot, { withFileTypes: true })
+function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string }[] {
+    const srcDir = path.resolve(projectRoot, 'src');
+    if (!fs.existsSync(srcDir)) return [];
+    const dirEntries = fs.readdirSync(srcDir, { withFileTypes: true })
         .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
         .map((d) => d.name)
         .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
     return dirEntries.map((dir) => {
-        const indexPath = path.resolve(projectRoot, dir, 'index.html');
+        const indexPath = path.resolve(srcDir, dir, 'index.html');
         const html = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf8') : '';
         const m = html.match(/<title>([^<]*)<\/title>/i);
         const title = m ? m[1].trim() : dir;
@@ -33,14 +34,35 @@ function generateSplashManifestPlugin() {
 		apply: 'serve',
 		configureServer(server: any) {
             const root = server.config.root;
-            const pages = scanRootSplashHtmlFiles(root);
+            const pages = scanSplashHtmlFilesInSrc(root);
 			writeSplashManifest(root, pages);
 			// Watch for changes and update manifest
-            fs.watch(root, { persistent: false }, () => {
-                const updatedPages = scanRootSplashHtmlFiles(root);
-                writeSplashManifest(root, updatedPages);
+            const watchDir = path.resolve(root, 'src');
+            if (fs.existsSync(watchDir)) {
+                fs.watch(watchDir, { persistent: false }, () => {
+                    const updatedPages = scanSplashHtmlFilesInSrc(root);
+                    writeSplashManifest(root, updatedPages);
+                });
+            }
+            // Dev rewrite: map /N/... to /src/N/...
+            server.middlewares.use((req: any, _res: any, next: any) => {
+                const raw = req.url || '/';
+                const [pathname, qs] = raw.split(/\?/, 2);
+                const query = qs ? `?${qs}` : '';
+                // Asset or nested path: /N/<rest>
+                const asset = pathname.match(/^\/(\d+)\/(.+)$/);
+                if (asset) {
+                    req.url = `/src/${asset[1]}/${asset[2]}${query}`;
+                    return next();
+                }
+                // Folder root: /N/ -> index.html
+                const page = pathname.match(/^\/(\d+)\/?$/);
+                if (page) {
+                    req.url = `/src/${page[1]}/index.html${query}`;
+                    return next();
+                }
+                next();
             });
-            // No rewrite needed when using folders with index.html during dev
 		},
 	};
 }
@@ -51,8 +73,8 @@ function generateSplashManifestBuildPlugin() {
 		apply: 'build',
 		buildStart(this: any) {
 			// @ts-ignore - vite injects config
-				const root: string = (this as any).meta?.watchMode ? process.cwd() : process.cwd();
-				const pages = scanRootSplashHtmlFiles(root);
+                const root: string = (this as any).meta?.watchMode ? process.cwd() : process.cwd();
+                const pages = scanSplashHtmlFilesInSrc(root);
 			writeSplashManifest(root, pages);
 		},
 	};
@@ -60,7 +82,7 @@ function generateSplashManifestBuildPlugin() {
 
 export default defineConfig(({ command }) => {
 	const projectRoot = process.cwd();
-    const splashPages = scanRootSplashHtmlFiles(projectRoot);
+    const splashPages = scanSplashHtmlFilesInSrc(projectRoot);
 	const input: Record<string, string> = { index: path.resolve(projectRoot, 'index.html') };
 	for (const page of splashPages) {
 		input[page.name] = page.absPath;
@@ -70,6 +92,28 @@ export default defineConfig(({ command }) => {
         plugins: [
             generateSplashManifestPlugin(),
             generateSplashManifestBuildPlugin(),
+            // After build, move dist/src/N/index.html -> dist/N/index.html
+            {
+                name: 'restructure-splash-output-to-root',
+                apply: 'build',
+                closeBundle() {
+                    const outDir = path.resolve(process.cwd(), 'dist');
+                    const srcOut = path.join(outDir, 'src');
+                    if (!fs.existsSync(srcOut)) return;
+                    const entries = fs.readdirSync(srcOut, { withFileTypes: true })
+                        .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
+                        .map((d) => d.name)
+                        .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+                    for (const dir of entries) {
+                        const fromPath = path.join(srcOut, dir, 'index.html');
+                        if (!fs.existsSync(fromPath)) continue;
+                        const destDir = path.join(outDir, dir);
+                        const toPath = path.join(destDir, 'index.html');
+                        if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+                        fs.renameSync(fromPath, toPath);
+                    }
+                },
+            },
         ],
         build: {
 			rollupOptions: {
