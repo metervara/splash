@@ -17,6 +17,8 @@
   
   --link-hover-color: white;
   --link-hover-bg-color: blue;
+
+  --visited-color: #6666ff;
   /* background on :visited is ignored by browsers */
 }
 
@@ -186,4 +188,5 @@ a:hover {
   text-decoration-color: rgba(255, 0, 0, 0.25);
   /* text-decoration-color: var(--link-bg-color); */
   text-decoration-style: solid;
+  color: var(--visited-color);
 }

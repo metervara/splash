@@ -85,7 +85,7 @@ function getDisplayName(path: string): string {
 	// Append final text after all items
 	const endLi = document.createElement('li');
 	const em = document.createElement('em');
-	em.textContent = 'The covers are small experiments of things I find interesting in the moment.';
+	em.textContent = 'The covers are small experiments of things that I find interesting in the moment.';
 	endLi.classList.add('end-text');
 	endLi.appendChild(em);
 	ul.appendChild(endLi);

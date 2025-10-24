@@ -33,6 +33,11 @@ export async function initSplashOverlay(): Promise<void> {
 	const nextLink = document.createElement('a');
 	nextLink.textContent = '>';
 
+	const listLink = document.createElement('a');
+	listLink.textContent = 'list';
+	listLink.href = '/index.html';
+	listLink.setAttribute('aria-label', 'List');
+
 	try {
 		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
 		if (!res.ok) throw new Error(String(res.status));
@@ -80,6 +85,7 @@ export async function initSplashOverlay(): Promise<void> {
 	}
 
 	container.appendChild(textBlock);
+	container.appendChild(listLink);
 	container.appendChild(randomLink);
 	container.appendChild(prevLink);
 	container.appendChild(nextLink);
