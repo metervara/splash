@@ -2,17 +2,18 @@
   --gap: 0.5em; 
   --line-height: 1.5;
   --bullet: "♦";  /* ○ ⦾ ● • ❏ ❐ ❑ ❒ ❖ ❘ ❙ ❚ ❛ ❜ ❝ ❞ ❡ ❢ ❣ ♥ ♦ ♣ ♠ ♦ ♣ ♠ */
-  --bullet-color:#aaaaff; /* rgb(0, 234, 207); */
-  --font-size: 4vw; 
+  /* --bullet-color:#aaaaff; */
+  --bullet-color:#ae003a;
+  --font-size: max(18px, 3vw); 
 
-  --text-color: blue;
+  --text-color: #0000aa;
   --bg-color: white;
 
-  --link-color: blue;
-  --link-bg-color: #ffffaa;
+  --link-color:  #0000aa;
+  --link-bg-color: #ddddff; /* #ffffaa; */
 
-  --nav-link-color: blue;
-  --nav-link-bg-color: #aaffcc;
+  --nav-link-color: #0000aa;
+  --nav-link-bg-color: #bbbbff; /* #aaffcc; */
   
   --link-hover-color: white;
   --link-hover-bg-color: blue;
@@ -34,6 +35,8 @@ body {
   background: var(--bg-color);
   font-size: var(--font-size);
   line-height: var(--line-height);
+  font-weight: 400;
+  font-style: normal;
   margin: 0;
   padding: 2vw;
 }
@@ -47,10 +50,22 @@ header, nav, main, aside, section, article, footer {
 h1, h2, h3, h4, h5, h6, p, span {
   display: inline;
   font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
   margin: 0;
-  font-weight: inherit; /* optional: remove heading weight */
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  font-style: normal;
+}
+
+em {
+  font-weight: 300;
+  font-style: italic;
+  word-break: break-all;
 }
 
 /* Uniform gaps between any adjacent elements */
@@ -114,7 +129,7 @@ a {
   color: var(--link-color);
   text-decoration: none;
   background: var(--link-bg-color);
-  padding: 0 calc(var(--gap) / 2);
+  padding: 0 calc(var(--gap) * 0.25);
   overflow-wrap: anywhere;
   word-break: break-all;
   white-space: normal;
@@ -133,6 +148,12 @@ nav a {
   content: var(--bullet);
   margin-inline: var(--gap);
   color: var(--bullet-color);
+}
+
+/* Ensure the final explanatory text sits above any overlays */
+.end-text {
+  position: relative;
+  z-index: 9999;
 }
 
 /* Restore original nav link styling via class */
@@ -159,6 +180,10 @@ a:hover {
 }
 
 /* enhanced visited state via JS */
-.is-visited {
+.is-visited:not(:hover) {
   text-decoration: line-through;
+  text-decoration-thickness: 0.5em;
+  text-decoration-color: rgba(255, 0, 0, 0.25);
+  /* text-decoration-color: var(--link-bg-color); */
+  text-decoration-style: solid;
 }

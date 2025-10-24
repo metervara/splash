@@ -48,6 +48,14 @@ function getDisplayName(path: string): string {
   const visited = getVisited();
 
     const items = await loadManifest();
+
+    // Update H1 with total count of covers
+    const h1 = document.querySelector('h1');
+    if (h1) {
+        const base = (h1.textContent ?? '').replace(/\s*\(\d+\)\s*$/, '');
+        h1.textContent = `${base} (${items.length})`;
+    }
+
     if (items.length === 0) return;
 
     const ul = pageEl as HTMLUListElement;
@@ -77,7 +85,8 @@ function getDisplayName(path: string): string {
 	// Append final text after all items
 	const endLi = document.createElement('li');
 	const em = document.createElement('em');
-	em.textContent = 'Covers are brief studies of ideas I\'m exploring at the moment.';
+	em.textContent = 'The covers are small experiments of things I find interesting in the moment.';
+	endLi.classList.add('end-text');
 	endLi.appendChild(em);
 	ul.appendChild(endLi);
 })();
