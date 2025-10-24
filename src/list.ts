@@ -73,4 +73,11 @@ function getDisplayName(path: string): string {
 		li.appendChild(a);
 		ul.appendChild(li);
 	}
+
+	// Append final text after all items
+	const endLi = document.createElement('li');
+	const em = document.createElement('em');
+	em.textContent = 'Covers are brief studies of ideas I\'m exploring at the moment.';
+	endLi.appendChild(em);
+	ul.appendChild(endLi);
 })();
