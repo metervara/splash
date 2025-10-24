@@ -5,6 +5,39 @@ export function selectRandom<T>(items: readonly T[]): T | undefined {
 }
 
 
+// Visited links helpers
+const VISITED_STORAGE_KEY = 'visited-links';
+
+function readVisitedSet(): Set<string> {
+	try {
+		const raw = localStorage.getItem(VISITED_STORAGE_KEY);
+		if (!raw) return new Set();
+		const arr = JSON.parse(raw) as string[];
+		return new Set(Array.isArray(arr) ? arr : []);
+	} catch {
+		return new Set();
+	}
+}
+
+function writeVisitedSet(set: Set<string>): void {
+	try {
+		localStorage.setItem(VISITED_STORAGE_KEY, JSON.stringify([...set]));
+	} catch {}
+}
+
+export function isVisited(href: string): boolean {
+	if (typeof href !== 'string' || href.length === 0) return false;
+	const set = readVisitedSet();
+	return set.has(href);
+}
+
+export function markVisited(href: string): void {
+	if (typeof href !== 'string' || href.length === 0) return;
+	const set = readVisitedSet();
+	set.add(href);
+	writeVisitedSet(set);
+}
+
 type ManifestEntry = string | { href: string; title?: string };
 
 function toHref(entry: ManifestEntry): string | null {
@@ -62,6 +95,11 @@ export async function initSplashOverlay(): Promise<void> {
 		const displayIndex = total > 0 ? safeIdx + 1 : 1;
 		const totalDisplay = total > 0 ? total : 1;
 		textBlock.textContent = `#${displayIndex} / ${totalDisplay}`;
+
+		// Mark current splash as visited using canonical manifest href
+		if (total > 0 && typeof manifest[safeIdx] === 'string') {
+			markVisited(manifest[safeIdx]);
+		}
 
 		// Random: navigate directly to a random splash (excluding current)
 		randomLink.href = '#';

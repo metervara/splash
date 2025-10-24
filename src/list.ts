@@ -1,3 +1,4 @@
+import { isVisited, markVisited } from './shared/utils';
 type ManifestEntry = string | { href: string; title?: string };
 
 async function loadManifest(): Promise<ManifestEntry[]> {
@@ -29,23 +30,7 @@ function getDisplayName(path: string): string {
     const pageEl = document.getElementById('page');
     if (!pageEl) return;
 
-  const STORAGE_KEY = 'visited-links';
-  function getVisited(): Set<string> {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return new Set();
-      const arr = JSON.parse(raw) as string[];
-      return new Set(arr);
-    } catch {
-      return new Set();
-    }
-  }
-  function saveVisited(set: Set<string>): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
-    } catch {}
-  }
-  const visited = getVisited();
+  // visited-links are handled via shared utils
 
     const items = await loadManifest();
 
@@ -72,12 +57,11 @@ function getDisplayName(path: string): string {
 		const a = document.createElement('a');
 		a.href = href;
 		a.textContent = `#${i + 1}: ${title}`;
-    if (visited.has(href)) a.classList.add('is-visited');
-    a.addEventListener('click', () => {
-      visited.add(href);
-      saveVisited(visited);
-      a.classList.add('is-visited');
-    }, { passive: true });
+	    if (isVisited(href)) a.classList.add('is-visited');
+	    a.addEventListener('click', () => {
+	      markVisited(href);
+	      a.classList.add('is-visited');
+	    }, { passive: true });
 		li.appendChild(a);
 		ul.appendChild(li);
 	}
