@@ -26,19 +26,19 @@ const ensureTextNode = (el: HTMLElement): Text => {
 	return textNode;
 };
 
-async function updateHeaderWithManifest(): Promise<void> {
-	const h2 = document.querySelector('header h2');
+// async function updateHeaderWithManifest(): Promise<void> {
+// 	const h2 = document.querySelector('header h2');
 
-	try {
-		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
-		if (!res.ok) throw new Error(String(res.status));
-		const manifest = (await res.json()) as string[];
-		const total = Array.isArray(manifest) ? manifest.length : 0;
-		h2!.textContent = `#4 - Ascii maze. Total: ${total}`;
-	} catch {
-		console.error('Failed to fetch splash manifest');
-	}
-}
+// 	try {
+// 		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
+// 		if (!res.ok) throw new Error(String(res.status));
+// 		const manifest = (await res.json()) as string[];
+// 		const total = Array.isArray(manifest) ? manifest.length : 0;
+// 		h2!.textContent = `#4 - Ascii maze. Total: ${total}`;
+// 	} catch {
+// 		console.error('Failed to fetch splash manifest');
+// 	}
+// }
 
 
 const writeText = async(text: string, target: HTMLElement, loop: boolean = false, speed: number = 100, random: boolean = false, withCursor: boolean = false): Promise<void> => {
@@ -120,7 +120,7 @@ const writeText = async(text: string, target: HTMLElement, loop: boolean = false
 document.addEventListener('DOMContentLoaded', async () => {
 	console.log('DOMContentLoaded');
 	await initSplashOverlay();
-	await updateHeaderWithManifest();
+	// await updateHeaderWithManifest();
 
 	const scroller = document.scrollingElement || document.documentElement;
 

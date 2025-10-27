@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
-function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string }[] {
+function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string; description: string }[] {
     const srcDir = path.resolve(projectRoot, 'src');
     if (!fs.existsSync(srcDir)) return [];
     const dirEntries = fs.readdirSync(srcDir, { withFileTypes: true })
@@ -14,20 +14,35 @@ function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath:
             const indexPath = path.resolve(srcDir, dir, 'index.html');
             if (!fs.existsSync(indexPath)) return null;
             const html = fs.readFileSync(indexPath, 'utf8');
-            const m = html.match(/<title>([^<]*)<\/title>/i);
-            const title = m ? m[1].trim() : dir;
-            return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title };
+            const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+            const title = titleMatch ? titleMatch[1].trim() : dir;
+            // Extract description - handle both single and double quotes
+            let description = '';
+            const metaMatch = html.match(/<meta\s+name=["']description["'][^>]*>/i);
+            if (metaMatch) {
+                const metaTag = metaMatch[0];
+                // Try double quotes first
+                let contentMatch = metaTag.match(/content="([^"]*)"/);
+                if (!contentMatch) {
+                    // Try single quotes
+                    contentMatch = metaTag.match(/content='([^']*)'/);
+                }
+                if (contentMatch) {
+                    description = contentMatch[1].trim();
+                }
+            }
+            return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title, description };
         })
-        .filter((p): p is { name: string; absPath: string; urlPath: string; title: string } => p !== null);
+        .filter((p): p is { name: string; absPath: string; urlPath: string; title: string; description: string } => p !== null);
 }
 
-function writeSplashManifest(projectRoot: string, pages: { urlPath: string; title: string }[]): void {
+function writeSplashManifest(projectRoot: string, pages: { urlPath: string; title: string; description: string }[]): void {
 	const publicDir = path.resolve(projectRoot, 'public');
 	if (!fs.existsSync(publicDir)) {
 		fs.mkdirSync(publicDir, { recursive: true });
 	}
 	const manifestPath = path.resolve(publicDir, 'splash-manifest.json');
-    const payload = pages.map((p) => ({ href: p.urlPath, title: p.title }));
+    const payload = pages.map((p) => ({ href: p.urlPath, title: p.title, description: p.description }));
 	fs.writeFileSync(manifestPath, JSON.stringify(payload, null, 2) + '\n');
 }
 
