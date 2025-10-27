@@ -55,24 +55,12 @@ export async function initSplashOverlay(): Promise<void> {
 	const container = document.createElement('div');
 	container.id = 'splash-overlay';
 	container.className = 'overlay';
-	container.style.display = 'flex';
-	container.style.flexDirection = 'column';
-	container.style.gap = '6px';
-
-	const textBlock = document.createElement('div');
-	textBlock.style.display = 'inline-flex';
-	textBlock.style.alignItems = 'center';
-	textBlock.style.gap = '6px';
 	
 	const firstRow = document.createElement('div');
-	firstRow.style.display = 'inline-flex';
-	firstRow.style.alignItems = 'center';
-	firstRow.style.gap = '6px';
+	firstRow.className = 'splash-overlay-row';
 
 	const buttonsRow = document.createElement('div');
-	buttonsRow.style.display = 'inline-flex';
-	buttonsRow.style.alignItems = 'center';
-	buttonsRow.style.gap = '6px';
+	buttonsRow.className = 'splash-overlay-row';
 
 	const randomLink = document.createElement('a');
 	randomLink.textContent = 'Randomize';
@@ -116,8 +104,16 @@ export async function initSplashOverlay(): Promise<void> {
 		const currentEntry = manifestRaw[safeIdx];
 		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
 		
-		// Create two-line layout: index on first line, title on second line
-		textBlock.innerHTML = `<div>#${displayIndex} / ${totalDisplay}</div>${title ? `<div>${title}</div>` : ''}`;
+		// Create first line: counter and title on same line
+		const counterDiv = document.createElement('div');
+		counterDiv.textContent = `#${displayIndex} / ${totalDisplay}`;
+		firstRow.appendChild(counterDiv);
+		
+		if (title) {
+			const titleDiv = document.createElement('div');
+			titleDiv.textContent = title;
+			firstRow.appendChild(titleDiv);
+		}
 
 		// Mark current splash as visited using canonical manifest href
 		if (total > 0 && typeof manifest[safeIdx] === 'string') {
@@ -146,17 +142,23 @@ export async function initSplashOverlay(): Promise<void> {
 		nextLink.href = total > 0 ? manifest[nextIdx] : '/';
 		nextLink.setAttribute('aria-label', 'Next splash');
 	} catch {
-		textBlock.innerHTML = '<div>#? / ?</div>';
+		const errorCounterDiv = document.createElement('div');
+		errorCounterDiv.textContent = '#? / ?';
+		firstRow.appendChild(errorCounterDiv);
 		randomLink.href = '/index.html';
 		prevLink.href = '/';
 		nextLink.href = '/';
 	}
 
-	container.appendChild(textBlock);
-	container.appendChild(listLink);
-	container.appendChild(randomLink);
-	container.appendChild(prevLink);
-	container.appendChild(nextLink);
+	// Add buttons to buttons row
+	buttonsRow.appendChild(listLink);
+	buttonsRow.appendChild(randomLink);
+	buttonsRow.appendChild(prevLink);
+	buttonsRow.appendChild(nextLink);
+
+	// Add rows to container
+	container.appendChild(firstRow);
+	container.appendChild(buttonsRow);
 
 	document.body.appendChild(container);
 }

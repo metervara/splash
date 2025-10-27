@@ -17,7 +17,7 @@
 /* Itemized overlay container (our injected control strip) */
 .overlay:not(a) {
   display: inline-flex;
-  align-items: center;
+  /* align-items: center; */
   gap: 6px;
   background: transparent;
   padding: 0;
@@ -46,6 +46,17 @@
   position: fixed;
   top: 16px;
   left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#splash-overlay .splash-overlay-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent !important;
+  padding: 0 !important;
 }
 
 #unsupported-overlay {
