@@ -55,8 +55,25 @@ export async function initSplashOverlay(): Promise<void> {
 	const container = document.createElement('div');
 	container.id = 'splash-overlay';
 	container.className = 'overlay';
+	container.style.display = 'flex';
+	container.style.flexDirection = 'column';
+	container.style.gap = '6px';
 
 	const textBlock = document.createElement('div');
+	textBlock.style.display = 'inline-flex';
+	textBlock.style.alignItems = 'center';
+	textBlock.style.gap = '6px';
+	
+	const firstRow = document.createElement('div');
+	firstRow.style.display = 'inline-flex';
+	firstRow.style.alignItems = 'center';
+	firstRow.style.gap = '6px';
+
+	const buttonsRow = document.createElement('div');
+	buttonsRow.style.display = 'inline-flex';
+	buttonsRow.style.alignItems = 'center';
+	buttonsRow.style.gap = '6px';
+
 	const randomLink = document.createElement('a');
 	randomLink.textContent = 'Randomize';
 
@@ -94,7 +111,13 @@ export async function initSplashOverlay(): Promise<void> {
 		const safeIdx = idx >= 0 ? idx : 0;
 		const displayIndex = total > 0 ? safeIdx + 1 : 1;
 		const totalDisplay = total > 0 ? total : 1;
-		textBlock.textContent = `#${displayIndex} / ${totalDisplay}`;
+		
+		// Get the current entry's title
+		const currentEntry = manifestRaw[safeIdx];
+		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
+		
+		// Create two-line layout: index on first line, title on second line
+		textBlock.innerHTML = `<div>#${displayIndex} / ${totalDisplay}</div>${title ? `<div>${title}</div>` : ''}`;
 
 		// Mark current splash as visited using canonical manifest href
 		if (total > 0 && typeof manifest[safeIdx] === 'string') {
@@ -123,7 +146,7 @@ export async function initSplashOverlay(): Promise<void> {
 		nextLink.href = total > 0 ? manifest[nextIdx] : '/';
 		nextLink.setAttribute('aria-label', 'Next splash');
 	} catch {
-		textBlock.textContent = '#? / ?';
+		textBlock.innerHTML = '<div>#? / ?</div>';
 		randomLink.href = '/index.html';
 		prevLink.href = '/';
 		nextLink.href = '/';

@@ -49,6 +49,11 @@ function generateSplashManifestPlugin() {
             }
             // Dev rewrite: map /N/... to /src/N/...
             server.middlewares.use((req: any, _res: any, next: any) => {
+                // Skip WebSocket upgrade requests (needed for HMR)
+                if (req.headers.upgrade === 'websocket') {
+                    return next();
+                }
+                
                 const raw = req.url || '/';
                 const [pathname, qs] = raw.split(/\?/, 2);
                 const query = qs ? `?${qs}` : '';

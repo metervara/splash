@@ -1,6 +1,8 @@
 :root {
-  --text-color: hsl(330, 90%, 70%);
-  --bg-color: #0000ff;
+  --text-color: white;
+  --bg-color: #333333;
+
+  --skew-amount: 10deg;
 }
 
 html, body {
@@ -10,9 +12,10 @@ body {
   margin: 0;
   font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   color: var(--text-color);
-  display: grid;
-  place-items: center;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;
 
   background-color: var(--bg-color);
 }
@@ -23,4 +26,8 @@ h1 {
   font-size: clamp(2.5rem, 8vw, 8rem);
   line-height: 1.1;
   letter-spacing: 0.02em;
+}
+
+p.instructions {
+  color: white;
 }
