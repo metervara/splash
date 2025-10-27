@@ -9,6 +9,8 @@
   font-size: 12px;
   line-height: 1;
   letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 300;
   user-select: none;
   -webkit-user-select: none;
   transition: background-color 150ms linear, color 150ms linear;

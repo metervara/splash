@@ -104,16 +104,10 @@ export async function initSplashOverlay(): Promise<void> {
 		const currentEntry = manifestRaw[safeIdx];
 		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
 		
-		// Create first line: counter and title on same line
-		const counterDiv = document.createElement('div');
-		counterDiv.textContent = `#${displayIndex} / ${totalDisplay}`;
-		firstRow.appendChild(counterDiv);
-		
-		if (title) {
-			const titleDiv = document.createElement('div');
-			titleDiv.textContent = title;
-			firstRow.appendChild(titleDiv);
-		}
+		// Create first line: counter and title in same box
+		const infoDiv = document.createElement('div');
+		infoDiv.textContent = `#${displayIndex} / ${totalDisplay}${title ? ` : ${title}` : ''}`;
+		firstRow.appendChild(infoDiv);
 
 		// Mark current splash as visited using canonical manifest href
 		if (total > 0 && typeof manifest[safeIdx] === 'string') {
