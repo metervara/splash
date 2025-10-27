@@ -3,7 +3,7 @@ import { ConfettiPaper, type ColorPair } from "./confetti/ConfettiPaper";
 import { ConfettiRibbon } from "./confetti/ConfettiRibbon";
 
 const CONFETTI_COUNT = 30;
-const RIBBON_COUNT = 1;
+const RIBBON_COUNT = 10;
 
 const colors: ColorPair[] = [
   ["#df0049", "#660671"], // red
@@ -57,7 +57,8 @@ class ConfettiMain {
       // Start ribbons just above the top edge so they always fall into view
       this.confettiRibbons[i] = new ConfettiRibbon(
         Math.random() * this.canvas.width,
-        -(rpCount * rpDist),
+				Math.random() * this.canvas.height * 1.5 - this.canvas.height * 0.5,
+        // -(rpCount * rpDist),
         rpCount,
         rpDist,
         rpThick,
@@ -96,6 +97,8 @@ class ConfettiMain {
   start(): void {
     this.stop();
 
+		this.prewarm();
+
     // Start animation loop
     this.lastFrameTime = performance.now();
     this.accumulator = 0;
@@ -108,6 +111,15 @@ class ConfettiMain {
       this.animationFrameId = null;
     }
   }
+
+	private prewarm(): void {
+		const prewarmSteps = 150;
+		let totalTime = 0;
+		while (totalTime < prewarmSteps) {
+			this.step(this.fixedDelta);
+			totalTime += 1;
+		}
+	}
 
   private animate = (): void => {
     this.animationFrameId = requestAnimationFrame(this.animate);

@@ -33,7 +33,6 @@ export class ConfettiRibbon {
 	ySpeed: number;
 
 	constructor(x: number, y: number, count: number, dist: number, thickness: number, angle: number, mass: number, drag: number, colors: ColorPair[]) {
-		console.log("constructor ribbon", x, y);
 		this.particleDist = dist;
 		this.particleCount = count;
 		this.particleMass = mass;
@@ -115,7 +114,6 @@ export class ConfettiRibbon {
 	}
 
 	private wrap(): void {
-		console.log("wrap ribbon");
 		this.position.y = -Math.random() * ConfettiRibbon.bounds.y;
 		this.position.x = Math.random() * ConfettiRibbon.bounds.x;
 		this.prevPosition = new Vector2(this.position.x, this.position.y);
