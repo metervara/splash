@@ -9,13 +9,16 @@ function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath:
         .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
         .map((d) => d.name)
         .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
-    return dirEntries.map((dir) => {
-        const indexPath = path.resolve(srcDir, dir, 'index.html');
-        const html = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf8') : '';
-        const m = html.match(/<title>([^<]*)<\/title>/i);
-        const title = m ? m[1].trim() : dir;
-        return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title };
-    });
+    return dirEntries
+        .map((dir) => {
+            const indexPath = path.resolve(srcDir, dir, 'index.html');
+            if (!fs.existsSync(indexPath)) return null;
+            const html = fs.readFileSync(indexPath, 'utf8');
+            const m = html.match(/<title>([^<]*)<\/title>/i);
+            const title = m ? m[1].trim() : dir;
+            return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title };
+        })
+        .filter((p): p is { name: string; absPath: string; urlPath: string; title: string } => p !== null);
 }
 
 function writeSplashManifest(projectRoot: string, pages: { urlPath: string; title: string }[]): void {
@@ -115,6 +118,11 @@ export default defineConfig(({ command }) => {
                 },
             },
         ],
+        resolve: {
+            alias: {
+                '/src': path.resolve(projectRoot, 'src'),
+            },
+        },
         build: {
 			rollupOptions: {
 				input,
