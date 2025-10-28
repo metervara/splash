@@ -1,202 +1,125 @@
-import { initSplashOverlay } from '/src/shared/utils';
+import { EulerMass, Spring, Vector2 } from "../shared/physics2d";
+import { initSplashOverlay } from "/src/shared/utils";
 
-interface Vec2 {
-	x: number;
-	y: number;
-}
+document.addEventListener("DOMContentLoaded", async () => {
+  await initSplashOverlay();
 
-interface DragState {
-	isDragging: boolean;
-	initialDotPos: Vec2; // Initial position of the dot element
-	mouseInitialPos: Vec2; // Where mouse was when drag started
-	mouseCurrentPos: Vec2; // Current mouse position
-	dotCurrentPos: Vec2; // Current dot position (may be different from mouse due to elastic)
-	dotVelocity: Vec2; // Velocity for spring animation
-	animationFrameId: number | null;
-}
+  const dot = document.querySelector("span.dot") as HTMLElement;
+  const h1 = document.querySelector("h1") as HTMLElement;
+  
+  if (!dot || !h1) return;
 
-// Configuration
-const MAX_DRAG_DISTANCE_PERCENT = 0.4; // Maximum drag distance as percentage of window width (0.15 = 15%)
-const ELASTIC_STRENGTH = 0.3; // How elastic the drag feels (0-1, lower = more elastic)
-const SPRING_STIFFNESS = 0.15; // Spring stiffness for snap-back
-const SPRING_DAMPING = 0.75; // Spring damping (0-1, higher = more damping)
 
-document.addEventListener('DOMContentLoaded', async () => {
-	await initSplashOverlay();
+  let animationFrameId: number | null = null;
+  let lastFrameTime: number = 0;
+  let accumulator: number = 0;
+  let fixedDelta: number = 1 / 60; // 60 FPS
 
-	const dot = document.querySelector('span.dot') as HTMLElement;
-	const h1 = document.querySelector('h1') as HTMLElement;
-	if (!dot || !h1) return;
+  let isDragging = false;
 
-	// Calculate max drag distance based on window width
-	let MAX_DRAG_DISTANCE = window.innerWidth * MAX_DRAG_DISTANCE_PERCENT;
+  const followMass = new EulerMass(0, 0, 1, 0.1); // The mass we move around when dragging
+  // const anchorMass = new EulerMass(0, 0, 0, 0); // Mass placed at dot origin position, pulling dot back into neutral place
+  const dragMass = new EulerMass(0, 0, 0, 0); // Mass moved around by mouse. 
+  const dragSpring = new Spring(followMass, dragMass, 1.0, 0.2, 0.0);
+  //const returnSpring = new Spring(followMass, anchorMass, 5.0, 0.2, 0.0);
 
-	// Get initial dot position
-	const rect = dot.getBoundingClientRect();
-	const initialDotPos: Vec2 = {
-		x: rect.left + rect.width / 2,
-		y: rect.top + rect.height / 2,
-	};
+  const render = () => {
+    const offX = followMass.position.x;
+    const offY = followMass.position.y;
+    dot.style.transform = `translate(${offX}px, ${offY}px)`;
+  };
 
-	const state: DragState = {
-		isDragging: false,
-		initialDotPos,
-		mouseInitialPos: { x: 0, y: 0 },
-		mouseCurrentPos: { x: 0, y: 0 },
-		dotCurrentPos: { ...initialDotPos },
-		dotVelocity: { x: 0, y: 0 },
-		animationFrameId: null,
-	};
+  const step = (deltaTime: number) => {
+    if(isDragging) {
+      dragSpring.apply();
+      // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
+    }
+    // returnSpring.apply();
+    followMass.integrate(deltaTime);
+    
+  }
+  
 
-	// Update max drag distance on window resize
-	window.addEventListener('resize', () => {
-		MAX_DRAG_DISTANCE = window.innerWidth * MAX_DRAG_DISTANCE_PERCENT;
-	});
+  // Handle drag start
+  const handleStart = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
 
-	// Calculate distance between two points
-	const distance = (a: Vec2, b: Vec2): number => {
-		const dx = b.x - a.x;
-		const dy = b.y - a.y;
-		return Math.sqrt(dx * dx + dy * dy);
-	};
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
-	// Elastic function: moves less as distance increases
-	const applyElastic = (rawDistance: number): number => {
-		// Near origin: 1:1 following, far from origin: strong resistance
-		// Uses a damping factor that increases with distance
-		const dampingFactor = 1 + rawDistance / (MAX_DRAG_DISTANCE * ELASTIC_STRENGTH);
-		return rawDistance / dampingFactor;
-	};
+    dragMass.setPosition(clientX, clientY);
 
-	// Update dot position and fold effect
-	const updateDotTransform = () => {
-		const offsetX = state.dotCurrentPos.x - state.initialDotPos.x;
-		const offsetY = state.dotCurrentPos.y - state.initialDotPos.y;
-		
-		// Apply transform to dot
-		dot.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-		
-		// Calculate current distance from origin
-		const currentDistance = distance(state.initialDotPos, state.dotCurrentPos);
-		
-		// Map distance to fold angle (0-90 degrees)
-		const foldAngle = (currentDistance / MAX_DRAG_DISTANCE) * 90;
-		h1.style.setProperty('--fold', foldAngle.toFixed(2));
-		
-		// Optional: log for debugging
-		// console.log('Distance:', currentDistance.toFixed(2), 'Fold:', foldAngle.toFixed(2));
-	};
+    // followMass.position.x = clientX +;
+    // followMass.position.y = clientY;
 
-	// Handle drag start
-	const handleStart = (e: MouseEvent | TouchEvent) => {
-		e.preventDefault();
-		const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-		const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-		
-		state.isDragging = true;
-		state.mouseInitialPos = { x: clientX, y: clientY };
-		state.mouseCurrentPos = { x: clientX, y: clientY };
-		state.dotVelocity = { x: 0, y: 0 }; // Reset velocity
-		
-		// Start animation loop
-		startAnimationLoop();
-	};
+    // NB! Only measure when at rest?
+    // const dotRect = dot.getBoundingClientRect();
+    
+    // anchorMass.position.x = dotRect.left + dotRect.width / 2;
+    // anchorMass.position.y = dotRect.top + dotRect.height / 2;
 
-	// Handle drag end - start spring-back
-	const handleEnd = () => {
-		state.isDragging = false;
-		// Animation continues to handle spring-back
-	};
+    isDragging = true;
+  };
 
-	// Handle mouse/touch move
-	const handleMove = (e: MouseEvent | TouchEvent) => {
-		if (!state.isDragging) return;
-		
-		const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-		const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-		
-		state.mouseCurrentPos = { x: clientX, y: clientY };
-	};
+  // Handle drag end - start spring-back
+  const handleEnd = () => {
+    isDragging = false;
+  };
 
-	// Main animation loop
-	const startAnimationLoop = () => {
-		if (state.animationFrameId !== null) return;
-		
-		const animate = () => {
-			if (state.isDragging) {
-				// Dragging: calculate elastic position
-				const dx = state.mouseCurrentPos.x - state.mouseInitialPos.x;
-				const dy = state.mouseCurrentPos.y - state.mouseInitialPos.y;
-				const rawDistance = Math.sqrt(dx * dx + dy * dy);
-				
-				if (rawDistance > 0) {
-					// Apply elastic damping
-					const elasticDistance = applyElastic(rawDistance);
-					const ratio = elasticDistance / rawDistance;
-					
-					// Calculate elastic position
-					state.dotCurrentPos = {
-						x: state.initialDotPos.x + dx * ratio,
-						y: state.initialDotPos.y + dy * ratio,
-					};
-				}
-				
-				updateDotTransform();
-				state.animationFrameId = requestAnimationFrame(animate);
-			} else {
-				// Spring-back animation
-				const dx = state.initialDotPos.x - state.dotCurrentPos.x;
-				const dy = state.initialDotPos.y - state.dotCurrentPos.y;
-				const dist = Math.sqrt(dx * dx + dy * dy);
-				
-				// Check if spring-back is complete
-				if (dist < 0.5 && Math.abs(state.dotVelocity.x) < 0.5 && Math.abs(state.dotVelocity.y) < 0.5) {
-					// Snap to origin and stop
-					state.dotCurrentPos = { ...state.initialDotPos };
-					state.dotVelocity = { x: 0, y: 0 };
-					updateDotTransform();
-					stopAnimationLoop();
-					return;
-				}
-				
-				// Apply spring physics
-				const springForceX = dx * SPRING_STIFFNESS;
-				const springForceY = dy * SPRING_STIFFNESS;
-				
-				state.dotVelocity.x += springForceX;
-				state.dotVelocity.y += springForceY;
-				
-				// Apply damping
-				state.dotVelocity.x *= SPRING_DAMPING;
-				state.dotVelocity.y *= SPRING_DAMPING;
-				
-				// Update position
-				state.dotCurrentPos.x += state.dotVelocity.x;
-				state.dotCurrentPos.y += state.dotVelocity.y;
-				
-				updateDotTransform();
-				state.animationFrameId = requestAnimationFrame(animate);
-			}
-		};
-		
-		state.animationFrameId = requestAnimationFrame(animate);
-	};
+  // Handle mouse/touch move
+  const handleMove = (e: MouseEvent | TouchEvent) => {
+    if (!isDragging) return;
 
-	const stopAnimationLoop = () => {
-		if (state.animationFrameId !== null) {
-			cancelAnimationFrame(state.animationFrameId);
-			state.animationFrameId = null;
-		}
-	};
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
-	// Mouse events
-	dot.addEventListener('mousedown', handleStart);
-	document.addEventListener('mousemove', handleMove);
-	document.addEventListener('mouseup', handleEnd);
+    dragMass.position.x = clientX;
+    dragMass.position.y = clientY;
 
-	// Touch events
-	dot.addEventListener('touchstart', handleStart, { passive: false });
-	document.addEventListener('touchmove', handleMove, { passive: false });
-	document.addEventListener('touchend', handleEnd);
+    console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
+
+  };
+
+  // Main animation loop
+  const startAnimationLoop = () => {
+    if (animationFrameId !== null) return;
+
+
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+
+      const currentTime = performance.now();
+      let frameTime = (currentTime - lastFrameTime) / 1000.0; // seconds
+      lastFrameTime = currentTime;
+
+      // Prevent spiral of death when tab is inactive or CPU is throttled
+      if (frameTime > 0.25) frameTime = 0.25; // cap at 250ms
+
+      accumulator += frameTime;
+
+      while (accumulator >= fixedDelta) {
+        step(fixedDelta);
+        accumulator -= fixedDelta;
+      }
+
+      render();
+
+    };
+    
+    animationFrameId = requestAnimationFrame(animate);
+  };
+
+  // Mouse events
+  dot.addEventListener("mousedown", handleStart);
+  document.addEventListener("mousemove", handleMove);
+  document.addEventListener("mouseup", handleEnd);
+
+  // Touch events
+  dot.addEventListener("touchstart", handleStart, { passive: false });
+  document.addEventListener("touchmove", handleMove, { passive: false });
+  document.addEventListener("touchend", handleEnd);
+
+  // measure();
+  // For now we run it all the time
+  startAnimationLoop();
 });
-

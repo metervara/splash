@@ -19,7 +19,23 @@ export class EulerMass {
 		this.force.add(f);
 	}
 
+	// Set position directly, optionally resetting velocity
+	setPosition(x: number, y: number, resetVelocity: boolean = true): void {
+		this.position.x = x;
+		this.position.y = y;
+		if (resetVelocity) {
+			this.velocity.x = 0;
+			this.velocity.y = 0;
+		}
+	}
+
 	integrate(dt: number): void {
+		// static or kinematic body → no integration. Use for anchors or mouse following masses
+		if (this.mass === 0) {
+			this.force = new Vector2(0, 0);
+			return;
+		}
+
 		// compute acceleration
 		const acc = this.currentForce(this.position);
 		acc.div(this.mass);

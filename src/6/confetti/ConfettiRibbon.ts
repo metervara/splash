@@ -1,5 +1,5 @@
-import { Vector2 } from './Vector2';
-import { EulerMass } from './EulerMass';
+import { Vector2 } from '../../shared/physics2d/Vector2';
+import { EulerMass } from '../../shared/physics2d/EulerMass';
 
 const DEG_TO_RAD = Math.PI / 180;
 

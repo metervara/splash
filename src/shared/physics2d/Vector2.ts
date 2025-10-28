@@ -50,5 +50,11 @@ export class Vector2 {
 	static sub(vec0: Vector2, vec1: Vector2): Vector2 {
 		return new Vector2(vec0.x - vec1.x, vec0.y - vec1.y);
 	}
+
+	static distance(vec0: Vector2, vec1: Vector2): number {
+    const dx = vec0.x - vec1.x;
+    const dy = vec0.y - vec1.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 }
 
