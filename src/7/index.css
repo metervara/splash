@@ -21,11 +21,35 @@ body {
 }
 
 h1 {
+  --fold: 20;              /* try 0–20 */
+  --scale-k: 0.01;
   margin: 0;
   font-weight: 400;
   font-size: clamp(2.5rem, 8vw, 8rem);
   line-height: 1.1;
-  letter-spacing: 0.02em;
+  /* letter-spacing: 0.02em; */
+  display:flex;
+  gap:0.02em;
+}
+
+h1 span {
+  display: inline-block;
+  border: 1px solid red;
+  --dir: 1;
+}
+
+h1 span:not(.dot) {
+  transform:
+    skewY(calc(var(--fold) * var(--dir) * 1deg))
+    scaleX(calc(1 - (var(--fold) * var(--scale-k))));
+}
+
+h1 span:not(.dot):nth-child(even) { 
+  --dir: -1; 
+}
+
+h1 span.dot {
+  border-color: blue;
 }
 
 p.instructions {

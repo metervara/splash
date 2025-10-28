@@ -151,6 +151,13 @@ export default defineConfig(({ command }) => {
         },
         server: {
             open: '/index.html',
+            watch: {
+                usePolling: false,
+                interval: 100,
+            },
+            hmr: {
+                overlay: true,
+            },
         },
 	};
 });
