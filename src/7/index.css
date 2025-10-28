@@ -1,8 +1,6 @@
 :root {
   --text-color: white;
   --bg-color: #333333;
-
-  --skew-amount: 10deg;
 }
 
 html, body {
@@ -25,7 +23,6 @@ h1 {
   font-size: clamp(2.5rem, 8vw, 8rem);
   margin: 0;
   line-height: 1.1;
-  letter-spacing: 0em;
 }
 
 h1 {
@@ -35,6 +32,8 @@ h1 {
   gap: 0;
   white-space: nowrap;
   font-variant-ligatures: none;    /* keep widths predictable */
+  /* shrink fraction = (1 - cos θ) → negative letter-spacing to pull letters in */
+  letter-spacing: calc((1 - cos(var(--θ))) * -0.75ch);
 }
 
 h1 span {
@@ -45,15 +44,12 @@ h1 span {
   /* transition: transform 200ms ease, margin 200ms ease; */
 }
 
-/* non-dot spans: skew alternates; scaleX = cos(θ); pull neighbors in */
+/* non-dot spans: skew alternates; scaleX = cos(θ) */
 h1 span:not(.dot) {
   --dir: 1; /* even spans flip this below */
   transform:
     skewY(calc(var(--dir) * var(--θ)))
     scaleX(calc(cos(var(--θ))));
-  /* shrink fraction = (1 - cos θ)
-     pull by half a glyph width: -0.5ch (layout-affecting) */
-  margin-inline-end: calc((1 - cos(var(--θ))) * -0.75ch);
 }
 
 /* alternate sign across non-dot spans (counted in document order) */
@@ -63,5 +59,4 @@ h1 span:not(.dot):nth-child(even) { --dir: -1; }
 h1 span.dot {
   position: relative;
   transform: none;
-  margin-inline-end: 0;
 }
