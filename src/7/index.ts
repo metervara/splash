@@ -1,4 +1,4 @@
-import { EulerMass, Spring } from "../shared/physics2d";
+import { VerletMass, Spring } from "../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -13,24 +13,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   let animationFrameId: number | null = null;
   let lastFrameTime: number = 0;
   let accumulator: number = 0;
-  let fixedDelta: number = 1 / 60; // 60 FPS
+  let fixedDelta: number = 1 / 120; // 120 Hz physics (smaller timestep = more stable)
 
   let isDragging = false;
 
-  const MASS_DRAG = 0.3;
-  const SPRING_STRENGTH = 50.0;
-  const SPRING_DAMPING = 0.2;
+  const SUBSTEPS = 5; // Splitting the timestep into smaller steps to improve stability
+
+  const MASS_DRAG = 0.5;           // Air resistance - helps stabilize
+  const SPRING_STRENGTH = 150.0;   // Higher = faster, more responsive
+  const SPRING_DAMPING = 1.5;      // Higher = less oscillation, more critical damping
 
   // Store the dot's original screen position
   const dotRect = dot.getBoundingClientRect();
   const originalX = dotRect.left + dotRect.width / 2;
   const originalY = dotRect.top + dotRect.height / 2;
 
-  const followMass = new EulerMass(originalX, originalY, 1, MASS_DRAG); // Start at dot's position
-  const anchorMass = new EulerMass(originalX, originalY, 0, 0); // Kinematic anchor at original position
-  const dragMass = new EulerMass(0, 0, 0, 0); // Mass moved around by mouse. 
+  const followMass = new VerletMass(originalX, originalY, 1, MASS_DRAG); // Start at dot's position
+  const anchorMass = new VerletMass(originalX, originalY, 0, 0); // Kinematic anchor at original position
+  const dragMass = new VerletMass(0, 0, 0, 0); // Mass moved around by mouse. 
   const dragSpring = new Spring(followMass, dragMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
   const returnSpring = new Spring(followMass, anchorMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
+
+  // Clamp velocity to prevent simulation explosions
+  // const MAX_VELOCITY = 5000; // pixels per second
+  // const clampVelocity = (mass: EulerMass) => {
+  //   const speed = mass.velocity.length();
+  //   if (speed > MAX_VELOCITY) {
+  //     mass.velocity.mul(MAX_VELOCITY / speed);
+  //   }
+  // };
 
   const render = () => {
     // Convert from screen coordinates to relative offset
@@ -45,8 +56,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
     }
     returnSpring.apply();
+    
+    // Clamp forces to prevent extreme accelerations
+    // const forceLimit = 50000;
+    // const forceMag = followMass.force.length();
+    // if (forceMag > forceLimit) {
+    //   followMass.force.mul(forceLimit / forceMag);
+    // }
+    
     followMass.integrate(deltaTime);
     
+    // Clamp velocity after integration
+    // clampVelocity(followMass);
   }
   
 
@@ -108,9 +129,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       accumulator += frameTime;
 
       while (accumulator >= fixedDelta) {
-        step(fixedDelta);
+        const h = fixedDelta / SUBSTEPS;
+      
+        for (let i = 0; i < SUBSTEPS; i++) {
+          step(h);
+        }
+      
         accumulator -= fixedDelta;
       }
+      // while (accumulator >= fixedDelta) {
+      //   step(fixedDelta);
+      //   accumulator -= fixedDelta;
+      // }
 
       render();
 
