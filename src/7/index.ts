@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   if (!dot || !h1) return;
 
-
   let animationFrameId: number | null = null;
   let lastFrameTime: number = 0;
   let accumulator: number = 0;
@@ -17,31 +16,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isDragging = false;
 
-  const SUBSTEPS = 5; // Splitting the timestep into smaller steps to improve stability
-
-  const MASS_DRAG = 0.5;           // Air resistance - helps stabilize
-  const SPRING_STRENGTH = 150.0;   // Higher = faster, more responsive
-  const SPRING_DAMPING = 1.5;      // Higher = less oscillation, more critical damping
-
   // Store the dot's original screen position
   const dotRect = dot.getBoundingClientRect();
   const originalX = dotRect.left + dotRect.width / 2;
   const originalY = dotRect.top + dotRect.height / 2;
+  
+  const SUBSTEPS = 6;          // or 5–8
+  const MASS_DRAG = 0.02;      // keep small with Verlet
+  const SPRING_STRENGTH = 100; // k
+  const SPRING_DAMPING  = 5;  // ~critical for m=1      // Higher = less oscillation, more critical damping
 
   const followMass = new VerletMass(originalX, originalY, 1, MASS_DRAG); // Start at dot's position
   const anchorMass = new VerletMass(originalX, originalY, 0, 0); // Kinematic anchor at original position
   const dragMass = new VerletMass(0, 0, 0, 0); // Mass moved around by mouse. 
   const dragSpring = new Spring(followMass, dragMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
   const returnSpring = new Spring(followMass, anchorMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
-
-  // Clamp velocity to prevent simulation explosions
-  // const MAX_VELOCITY = 5000; // pixels per second
-  // const clampVelocity = (mass: EulerMass) => {
-  //   const speed = mass.velocity.length();
-  //   if (speed > MAX_VELOCITY) {
-  //     mass.velocity.mul(MAX_VELOCITY / speed);
-  //   }
-  // };
 
   const render = () => {
     // Convert from screen coordinates to relative offset
@@ -56,20 +45,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
     }
     returnSpring.apply();
-    
-    // Clamp forces to prevent extreme accelerations
-    // const forceLimit = 50000;
-    // const forceMag = followMass.force.length();
-    // if (forceMag > forceLimit) {
-    //   followMass.force.mul(forceLimit / forceMag);
-    // }
-    
-    followMass.integrate(deltaTime);
-    
-    // Clamp velocity after integration
-    // clampVelocity(followMass);
-  }
   
+    followMass.integrate(deltaTime);
+  }
 
   // Handle drag start
   const handleStart = (e: MouseEvent | TouchEvent) => {
