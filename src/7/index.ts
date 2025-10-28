@@ -1,4 +1,4 @@
-import { EulerMass, Spring, Vector2 } from "../shared/physics2d";
+import { EulerMass, Spring } from "../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -17,15 +17,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isDragging = false;
 
-  const followMass = new EulerMass(0, 0, 1, 0.1); // The mass we move around when dragging
-  // const anchorMass = new EulerMass(0, 0, 0, 0); // Mass placed at dot origin position, pulling dot back into neutral place
+  const MASS_DRAG = 0.3;
+  const SPRING_STRENGTH = 50.0;
+  const SPRING_DAMPING = 0.2;
+
+  // Store the dot's original screen position
+  const dotRect = dot.getBoundingClientRect();
+  const originalX = dotRect.left + dotRect.width / 2;
+  const originalY = dotRect.top + dotRect.height / 2;
+
+  const followMass = new EulerMass(originalX, originalY, 1, MASS_DRAG); // Start at dot's position
+  const anchorMass = new EulerMass(originalX, originalY, 0, 0); // Kinematic anchor at original position
   const dragMass = new EulerMass(0, 0, 0, 0); // Mass moved around by mouse. 
-  const dragSpring = new Spring(followMass, dragMass, 1.0, 0.2, 0.0);
-  //const returnSpring = new Spring(followMass, anchorMass, 5.0, 0.2, 0.0);
+  const dragSpring = new Spring(followMass, dragMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
+  const returnSpring = new Spring(followMass, anchorMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
 
   const render = () => {
-    const offX = followMass.position.x;
-    const offY = followMass.position.y;
+    // Convert from screen coordinates to relative offset
+    const offX = followMass.position.x - originalX;
+    const offY = followMass.position.y - originalY;
     dot.style.transform = `translate(${offX}px, ${offY}px)`;
   };
 
@@ -34,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       dragSpring.apply();
       // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
     }
-    // returnSpring.apply();
+    returnSpring.apply();
     followMass.integrate(deltaTime);
     
   }
@@ -47,16 +57,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
+    // Get the dot's current position in screen coordinates
+    const dotRect = dot.getBoundingClientRect();
+    const dotCenterX = dotRect.left + dotRect.width / 2;
+    const dotCenterY = dotRect.top + dotRect.height / 2;
+
+    // Initialize both masses at the dot's position (screen coordinates)
+    followMass.setPosition(dotCenterX, dotCenterY);
     dragMass.setPosition(clientX, clientY);
 
-    // followMass.position.x = clientX +;
-    // followMass.position.y = clientY;
-
-    // NB! Only measure when at rest?
-    // const dotRect = dot.getBoundingClientRect();
-    
-    // anchorMass.position.x = dotRect.left + dotRect.width / 2;
-    // anchorMass.position.y = dotRect.top + dotRect.height / 2;
+    // anchorMass stays fixed at its original position
 
     isDragging = true;
   };
@@ -76,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     dragMass.position.x = clientX;
     dragMass.position.y = clientY;
 
-    console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
+    // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
 
   };
 

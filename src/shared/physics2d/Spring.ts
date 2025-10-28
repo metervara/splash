@@ -37,9 +37,10 @@ export class Spring {
     // Normalized axis from a -> b
     const nx = new Vector2(dx.x / dist, dx.y / dist);
 
-    // Hooke’s law: F_spring = -k * (|x| - L0) along the axis
+    // Hooke's law: F_spring = k * (|x| - L0) along the axis
+    // Positive force when stretched pulls a toward b
     const x = dist - this.restLength;
-    const fSpring = -this.strength * x;
+    const fSpring = this.strength * x;
 
     // Relative velocity projected onto the spring axis
     const dv = new Vector2(this.b.velocity.x - this.a.velocity.x, this.b.velocity.y - this.a.velocity.y);
@@ -72,7 +73,7 @@ export class Spring {
 
     const nx = new Vector2(dx.x / dist, dx.y / dist);
     const x = dist - this.restLength;
-    const fSpring = -this.strength * x;
+    const fSpring = this.strength * x;
 
     const dv = new Vector2(this.b.velocity.x - this.a.velocity.x, this.b.velocity.y - this.a.velocity.y);
     const vRelAlong = dv.x * nx.x + dv.y * nx.y;
