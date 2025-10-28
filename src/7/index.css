@@ -21,37 +21,47 @@ body {
 }
 
 h1 {
-  --fold: 20;              /* try 0–20 */
-  --scale-k: 0.01;
-  margin: 0;
   font-weight: 400;
   font-size: clamp(2.5rem, 8vw, 8rem);
+  margin: 0;
   line-height: 1.1;
-  /* letter-spacing: 0.02em; */
-  display:flex;
-  gap:0.02em;
+  letter-spacing: 0em;
+}
+
+h1 {
+  --fold: 0;                       /* unitless control */
+  --θ: calc(var(--fold) * 1deg);   /* angle from fold */
+  display: inline-flex;
+  gap: 0;
+  white-space: nowrap;
+  font-variant-ligatures: none;    /* keep widths predictable */
 }
 
 h1 span {
-  display: inline-block;
+  box-sizing: border-box;
   border: 1px solid red;
-  --dir: 1;
+  display: inline-block;
+  transform-origin: center;
+  /* transition: transform 200ms ease, margin 200ms ease; */
 }
 
+/* non-dot spans: skew alternates; scaleX = cos(θ); pull neighbors in */
 h1 span:not(.dot) {
+  --dir: 1; /* even spans flip this below */
   transform:
-    skewY(calc(var(--fold) * var(--dir) * 1deg))
-    scaleX(calc(1 - (var(--fold) * var(--scale-k))));
+    skewY(calc(var(--dir) * var(--θ)))
+    scaleX(calc(cos(var(--θ))));
+  /* shrink fraction = (1 - cos θ)
+     pull by half a glyph width: -0.5ch (layout-affecting) */
+  margin-inline-end: calc((1 - cos(var(--θ))) * -0.75ch);
 }
 
-h1 span:not(.dot):nth-child(even) { 
-  --dir: -1; 
-}
+/* alternate sign across non-dot spans (counted in document order) */
+h1 span:not(.dot):nth-child(even) { --dir: -1; }
 
+/* dots stay put */
 h1 span.dot {
-  border-color: blue;
-}
-
-p.instructions {
-  color: white;
+  position: relative;
+  transform: none;
+  margin-inline-end: 0;
 }

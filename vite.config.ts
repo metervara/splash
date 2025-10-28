@@ -69,6 +69,11 @@ function generateSplashManifestPlugin() {
                     return next();
                 }
                 
+                // Skip HMR-related paths
+                if (req.url && (req.url.includes('/@vite') || req.url.includes('/@fs') || req.url.includes('/__vite'))) {
+                    return next();
+                }
+                
                 const raw = req.url || '/';
                 const [pathname, qs] = raw.split(/\?/, 2);
                 const query = qs ? `?${qs}` : '';
@@ -85,6 +90,21 @@ function generateSplashManifestPlugin() {
                     return next();
                 }
                 next();
+            });
+            
+            // Handle HMR for rewritten paths
+            server.ws.on('connection', () => {
+                // Force a full reload when files in subdirectories change
+                const watcher = server.watcher;
+                watcher.on('change', (file: string) => {
+                    // If a file in a numbered directory changes, send full reload
+                    if (file.match(/\/src\/\d+\//)) {
+                        server.ws.send({
+                            type: 'full-reload',
+                            path: '*'
+                        });
+                    }
+                });
             });
 		},
 	};
