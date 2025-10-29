@@ -66,4 +66,20 @@ h1 span:not(.dot):nth-child(even) {
 h1 span.dot {
   position: relative;
   transform: none;
+  cursor: pointer;
+  /* border: 1px solid red; */
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1ch;
+  height: 1ch;
+  line-height: 1;
+  
+  /* Align the span to the bottom of the flex container */
+  align-self: flex-end;
+  margin-bottom: 0.1em;
+  
+  /* Adjust vertical placement of character inside the span */
+  padding-bottom: 0.1em; /* Adjust this value: positive = character moves down inside span */
 }
