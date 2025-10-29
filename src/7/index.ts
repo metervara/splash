@@ -6,7 +6,7 @@ import accordionLoop from "./assets/accordion-loop.wav";
 document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
 
-  const dot = document.querySelector("span.dot") as HTMLElement;
+  const dot = document.querySelector(".dot") as HTMLElement;
   const h1 = document.querySelector("h1") as HTMLElement;
   
   if (!dot || !h1) return;
@@ -93,6 +93,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const handleStart = async (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
 
+    dot.classList.add("dragging");
+
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
@@ -118,6 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Handle drag end - start spring-back
   const handleEnd = () => {
     isDragging = false;
+    dot.classList.remove("dragging");
   };
 
   // Handle mouse/touch move
