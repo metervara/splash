@@ -158,3 +158,32 @@ export async function initSplashOverlay(): Promise<void> {
 }
 
 
+/**
+ * Remaps a number from one range to another.
+ *
+ * @param value - The input number to map.
+ * @param inMin - Lower bound of the input range.
+ * @param inMax - Upper bound of the input range.
+ * @param outMin - Lower bound of the output range.
+ * @param outMax - Upper bound of the output range.
+ * @returns The mapped number.
+ *
+ * Example:
+ *   map(-5, -10, 0, 0, 100) // → 50
+ *   map(5, 0, 10, 100, 200) // → 150
+ *   map(10, 0, 10, 100, 0)  // → 0 (inverted output range)
+ */
+export function map(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number
+): number {
+  if (inMin === inMax) {
+    throw new Error("Input range cannot have the same min and max values.");
+  }
+
+  const proportion = (value - inMin) / (inMax - inMin);
+  return outMin + proportion * (outMax - outMin);
+}

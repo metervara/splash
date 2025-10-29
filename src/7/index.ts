@@ -1,6 +1,6 @@
 import { VerletMass, Spring, Vector2 } from "../shared/physics2d";
-import { initSplashOverlay } from "/src/shared/utils";
-import { LoopingWavPlayer } from "./LoopingWavPlayer";
+import { initSplashOverlay, map } from "/src/shared/utils";
+import { LoopingWavPlayer } from "./LoopingWavPlayer.js";
 import accordionLoop from "./assets/accordion-loop.wav";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -54,9 +54,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const offY = followMass.position.y - dotOrigin.y;
     dot.style.transform = `translate(${offX}px, ${offY}px)`;
 
-    // const restDistToCenter = Vector2.distance(anchorMass.position, h1Origin);
-    // const currentDistToCenter = Vector2.distance(followMass.position, h1Origin);
-    // const stretch = Math.min(Math.max((currentDistToCenter - restDistToCenter) / restDistToCenter, -1), 1); // For audio & skew efefct
+    const restDistToCenter = Vector2.distance(anchorMass.position, h1Origin);
+    const currentDistToCenter = Vector2.distance(followMass.position, h1Origin);
+    
+    const stretch = Math.min(Math.max((currentDistToCenter - restDistToCenter) / restDistToCenter, -1), 1); // For audio & skew efefct
+    const fold = map(stretch, -1, 1, 40, 0);
+    h1.style.setProperty("--fold", `${fold}`);
+
     const speed = followMass.velocity.length(); // For audio
 
     player.update(speed);
