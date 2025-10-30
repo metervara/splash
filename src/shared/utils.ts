@@ -52,6 +52,13 @@ export async function initSplashOverlay(): Promise<void> {
 	const existing = document.getElementById('splash-overlay');
 	if (existing) existing.remove();
 
+	// Clean up any existing keyboard listener
+	const existingHandler = (window as any).__splashOverlayKeyHandler;
+	if (existingHandler) {
+		document.removeEventListener('keydown', existingHandler);
+		delete (window as any).__splashOverlayKeyHandler;
+	}
+
 	const container = document.createElement('div');
 	container.id = 'splash-overlay';
 	container.className = 'overlay';
@@ -155,6 +162,31 @@ export async function initSplashOverlay(): Promise<void> {
 	container.appendChild(buttonsRow);
 
 	document.body.appendChild(container);
+
+	// Add keyboard navigation for arrow keys
+	const handleKeyDown = (e: KeyboardEvent) => {
+		// Don't navigate if user is typing in an input field
+		const target = e.target as HTMLElement;
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+
+		if (e.key === 'ArrowLeft') {
+			e.preventDefault();
+			if (prevLink.href && prevLink.href !== '#' && prevLink.href !== window.location.href) {
+				window.location.href = prevLink.href;
+			}
+		} else if (e.key === 'ArrowRight') {
+			e.preventDefault();
+			if (nextLink.href && nextLink.href !== '#' && nextLink.href !== window.location.href) {
+				window.location.href = nextLink.href;
+			}
+		}
+	};
+
+	// Store handler reference and add listener
+	(window as any).__splashOverlayKeyHandler = handleKeyDown;
+	document.addEventListener('keydown', handleKeyDown);
 }
 
 

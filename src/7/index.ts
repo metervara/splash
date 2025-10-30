@@ -2,7 +2,7 @@ import { VerletMass, Spring, Vector2 } from "../shared/physics2d";
 import { initSplashOverlay, map } from "/src/shared/utils";
 
 import { DoubleLoopingWavPlayer } from "./DoubleLoopingWavPlayer.js";
-import { LoopingWavPlayer } from "./LoopingWavPlayer.js";
+// import { LoopingWavPlayer } from "./LoopingWavPlayer.js";
 
 import accordionLoop from "./assets/accordion-loop-Amin.wav";
 import accordionLoop2 from "./assets/accordion-loop-Bmin.wav";
@@ -28,7 +28,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     audioTau: 0.03,
 
     // ewmaTau: 0.15,       // motion smoothing (seconds)
-    
     volMin: 0.0,
     volMax: 1.0,
     
