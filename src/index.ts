@@ -39,7 +39,7 @@ async function pickRandomSplash(): Promise<string | null> {
 		if (statusEl) statusEl.textContent = 'Redirecting…';
 		window.location.replace(target);
 	} else {
-		if (statusEl) statusEl.textContent = 'No splashes found. Add files in \`/splashes\`.';
+		if (statusEl) statusEl.textContent = 'No covers found. Add files in \`/splashes\`.';
 	}
 })();
 

@@ -1,4 +1,4 @@
-import { isVisited, markVisited } from './shared/utils';
+import { isVisited, markVisited, selectRandom } from './shared/utils';
 type ManifestEntry = string | { href: string; title?: string };
 
 async function loadManifest(): Promise<ManifestEntry[]> {
@@ -24,6 +24,20 @@ function toTitle(entry: ManifestEntry): string {
 function getDisplayName(path: string): string {
     const base = path.replace(/^\/+/, '').replace(/\.html$/, '').replace(/\/$/, '');
     return base;
+}
+
+async function loadRandomCover(): Promise<void> {
+    const items = await loadManifest();
+    if (items.length === 0) return;
+    
+    const chosenItem = selectRandom(items);
+    if (!chosenItem) return;
+    
+    const href = toHref(chosenItem);
+    if (href) {
+        markVisited(href);
+        window.location.href = href;
+    }
 }
 
 (async () => {
@@ -73,4 +87,13 @@ function getDisplayName(path: string): string {
 	endLi.classList.add('end-text');
 	endLi.appendChild(em);
 	ul.appendChild(endLi);
+
+	// Set up randomize link
+	const randomizeLink = document.querySelector('a.nav-link');
+	if (randomizeLink) {
+		randomizeLink.addEventListener('click', async (e) => {
+			e.preventDefault();
+			await loadRandomCover();
+		});
+	}
 })();
