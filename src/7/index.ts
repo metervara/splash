@@ -1,29 +1,44 @@
 import { VerletMass, Spring, Vector2 } from "../shared/physics2d";
 import { initSplashOverlay, map } from "/src/shared/utils";
+
+import { DoubleLoopingWavPlayer } from "./DoubleLoopingWavPlayer.js";
 import { LoopingWavPlayer } from "./LoopingWavPlayer.js";
-import accordionLoop from "./assets/accordion-loop.wav";
+
+import accordionLoop from "./assets/accordion-loop-Amin.wav";
+import accordionLoop2 from "./assets/accordion-loop-Bmin.wav";
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
 
   const dot = document.querySelector(".dot") as HTMLElement;
   const h1 = document.querySelector("h1") as HTMLElement;
+  const hint = document.querySelector(".hint") as HTMLElement;
   
   if (!dot || !h1) return;
 
   let playerStarted = false;
-  let player: LoopingWavPlayer = new LoopingWavPlayer({
-    url: accordionLoop,        // comes from import above
+  let player: DoubleLoopingWavPlayer = new DoubleLoopingWavPlayer({
+    leftUrl: accordionLoop,
+    rightUrl: accordionLoop2,
     motionMin: 50,       // px/s -> 0 volume
     motionMax: 1000,      // px/s -> 1 volume
-    invert: false,
+    
+    ewmaTauSpeed: 0.15,
+    ewmaTauDir: 0.15,   // seconds, exponential smoothing for direction
+    audioTau: 0.03,
+
+    // ewmaTau: 0.15,       // motion smoothing (seconds)
+    
     volMin: 0.0,
     volMax: 1.0,
-    ewmaTau: 0.15,       // motion smoothing (seconds)
-    audioTau: 0.03,      // gain smoothing (seconds)
+    
     autoStart: false,    // we’ll start after a user gesture
   });
   await player.ready; 
+
+  let maxSkew: number = 40;
+  h1.style.setProperty("--fold-max", `${maxSkew}`);
+  h1.style.setProperty("--fold", `${maxSkew / 2}`);
 
   let animationFrameId: number | null = null;
   let lastFrameTime: number = 0;
@@ -48,6 +63,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const dragSpring = new Spring(followMass, dragMass, SPRING_STRENGTH, SPRING_DAMPING, 0.0);
   const returnSpring = new Spring(followMass, anchorMass, RETURN_SPRING_STRENGTH, RETURN_SPRING_DAMPING, 0.0);
 
+  let prevDistToCenter: number = 0;
+
   const render = () => {
     // Convert from screen coordinates to relative offset
     const offX = followMass.position.x - dotOrigin.x;
@@ -56,14 +73,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const restDistToCenter = Vector2.distance(anchorMass.position, h1Origin);
     const currentDistToCenter = Vector2.distance(followMass.position, h1Origin);
-    
-    const stretch = Math.min(Math.max((currentDistToCenter - restDistToCenter) / restDistToCenter, -1), 1); // For audio & skew efefct
-    const fold = map(stretch, -1, 1, 40, 0);
+    const dir = Math.sign(currentDistToCenter - prevDistToCenter);
+    prevDistToCenter = currentDistToCenter;
+    const stretch = Math.min(Math.max((currentDistToCenter - restDistToCenter) / restDistToCenter, -1), 1);
+    const stretchNorm = stretch / 2 + 0.5;
+    const fold = map(stretch, -1, 1, maxSkew, 0);
     h1.style.setProperty("--fold", `${fold}`);
+    h1.style.setProperty("--stretch", `${stretchNorm}`);
 
-    const speed = followMass.velocity.length(); // For audio
-
-    player.update(speed);
+    const speed = followMass.velocity.length(); 
+    player.update(speed, dir);
   };
 
   const step = (deltaTime: number) => {
@@ -115,6 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     isDragging = true;
+    hint.classList.add("hidden");
   };
 
   // Handle drag end - start spring-back
@@ -132,8 +152,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     dragMass.position.x = clientX;
     dragMass.position.y = clientY;
-
-    // console.log(dragSpring.restLength, Vector2.distance(dragMass.position, followMass.position));
 
   };
 
@@ -163,10 +181,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       
         accumulator -= fixedDelta;
       }
-      // while (accumulator >= fixedDelta) {
-      //   step(fixedDelta);
-      //   accumulator -= fixedDelta;
-      // }
 
       render();
 

@@ -1,7 +1,14 @@
 :root {
-  --text-color: white;
-  --text-dark: blue;
-  --bg-color: #333333;
+  --text-color: #f1dddd;
+  --hint-color: rgb(252, 151, 151);
+  /* --text-color: #c8aeae; */
+  /* --text-tint-even: red; */
+  --text-tint-even: rgb(116, 98, 214);
+  --text-tint-odd: white;
+  /* --text-dark: blue; */
+  --bg-color: #123530;
+
+  --weight: 400;
 }
 
 html, body {
@@ -11,6 +18,7 @@ body {
   margin: 0;
   font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   color: var(--text-color);
+  
   display: flex;
   flex-direction: column;
   justify-content: center; 
@@ -20,7 +28,7 @@ body {
 }
 
 h1 {
-  font-weight: 400;
+  font-weight: var(--weight);
   font-size: clamp(2.5rem, 8vw, 8rem);
   margin: 0;
   line-height: 1.1;
@@ -32,30 +40,36 @@ h1 {
 }
 
 h1 {
-  --fold: 20;                       /* unitless control */
+  --fold: 20; 
+  --fold-max: 40;                       /* unitless control */
   --θ: calc(var(--fold) * 1deg);   /* angle from fold */
-  --t: calc(var(--fold) / 40 * 100%);
+  /* --t: calc(var(--fold) / var(--fold-max) * 100%); */
+  --stretch: 0.5;
+  --scale-x: calc(var(--stretch) + 0.5);
+  --scale-y: calc(1.5 - var(--stretch));
+  --t: calc(var(--stretch) * 100%);
+  
   display: inline-flex;
   gap: 0;
   white-space: nowrap;
   font-variant-ligatures: none;    /* keep widths predictable */
   /* shrink fraction = (1 - cos θ) → negative letter-spacing to pull letters in */
   letter-spacing: calc((1 - cos(var(--θ))) * -0.5ch);
+  transform: scale(var(--scale-x), var(--scale-y));
 }
 
 h1 span {
   box-sizing: border-box;
-  /* border: 1px solid red; */
   display: inline-block;
   transform-origin: center;
-  
-  /* transition: transform 200ms ease, margin 200ms ease; */
 }
 
-/* non-dot spans: skew alternates; scaleX = cos(θ) */
 h1 span {
-  --dir: 1; /* even spans flip this below */
+  --dir: 1;
   text-decoration: underline;
+
+  /* color: color-mix(in srgb, var(--text-tint-odd) var(--t), var(--text-color)); */
+
   transform:
     skewY(calc(var(--dir) * var(--θ)))
     /* scaleX(calc(cos(var(--θ)))); */
@@ -64,7 +78,7 @@ h1 span {
 /* alternate sign across spans (counted in document order) */
 h1 span:nth-child(even) {
   --dir: -1; 
-  color: color-mix(in srgb, var(--text-dark) var(--t), var(--text-color) 100%);
+  color: color-mix(in srgb, var(--text-color) var(--t), var(--text-tint-even));
 }
 
 /* Dot container - absolutely positioned after h1 */
@@ -80,7 +94,8 @@ h1 span:nth-child(even) {
   pointer-events: auto;
   overflow: hidden;
 
-  font-weight: 400;
+
+  font-weight: var(--weight);
   font-size: clamp(2.5rem, 8vw, 8rem);
   margin: 0;
   line-height: 1.1;
@@ -98,8 +113,8 @@ h1 span:nth-child(even) {
   height: 100%;
   line-height: 1;
   transform-origin: 50% 50%;
-  transition: transform 150ms cubic-bezier(0,.5,.5,1);
-  /* border: 1px solid red; */
+  transition: transform 250ms cubic-bezier(0,.5,.5,1);
+  
   padding-bottom: 0.12em;
 }
 
@@ -107,3 +122,50 @@ h1 span:nth-child(even) {
 .dot:hover .dot-inner {
   transform: scale(1.3);
 }
+
+.hint {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: italic;
+  font-variation-settings:
+    "wdth" 100;
+
+  position: absolute;
+  bottom: 50%;
+  left: 104.5%;
+  width: 3vw;
+  opacity: 1;
+  transition: opacity 150ms linear;
+}
+
+.hint.hidden {
+  opacity: 0;
+}
+
+.hint::after {
+  content: "Drag the dot";
+  position: absolute;
+  left: 110%;
+  bottom: 105%;
+  white-space: nowrap;
+  /* text-align: center; */
+  transform: translateX(-50%);
+  color: var(--hint-color);
+  font-size: max(1.25vw, 12px);
+}
+
+.hint svg {
+  width: 100%;             /* fills the .hint container width */
+  height: auto;            /* keeps the aspect ratio */
+  display: block;          /* removes inline spacing below SVG */
+}
+
+.hint svg path {
+  stroke: var(--hint-color);
+  stroke-width: 1.5;
+}
+
+/* .hint svg path.arrow-curve {
+  stroke-dasharray: 5px;
+} */
