@@ -24,11 +24,7 @@
 
 * { box-sizing: border-box; }
 
-html, body {
-  scroll-snap-type: y mandatory;
-  width: 100%;
-  height: 100%;
-}
+/* page-level scroll snapping not needed here */
 
 /* Global text + spacing */
 body {
@@ -43,31 +39,23 @@ body {
   padding: 2vw;
 }
 
-/* “Content-only” semantic wrappers (no boxes) */
-header, nav, main, aside, section, article, footer {
-  display: contents;
+section {
+  margin-bottom: 2vw;
 }
 
-/* Headings & text: same size, no default margins */
-h1, h2, h3, h4, h5, h6, p, span {
+/* Only style the heading we actually use */
+h1 {
   display: inline;
   font-size: inherit;
-  font-weight: inherit;
-  font-style: inherit;
-  margin: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   font-style: normal;
+  margin: 0;
 }
 
 em {
   font-weight: 300;
   font-style: italic;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 
 /* Uniform gaps between any adjacent elements */
@@ -78,50 +66,18 @@ ul, ol {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: contents; /* don’t create a block box for the list */
 }
 
 /* Inline list items without extra left margin (we use a delimiter instead) */
 li {
   display: inline;
   overflow-wrap: anywhere;
-  word-break: break-word;
+  /* word-break: break-word; */
 }
 
-/* Add inline delimiter between any two inline items (incl. list items) */
-:where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li)
-  + :where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li)::before {
-  content: var(--bullet);
-  margin-inline: var(--gap);
-  color: var(--bullet-color);
-}
-
-/* Cancel default gap when an inline item is followed by a wrapper */
-:where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li)
-  + :where(header,nav,main,aside,section,article,footer) {
-  margin-left: 0;
-}
-
-/* Handle wrappers (header/nav/section/…) between inline items: add bullet before first child */
-:where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li)
-  + :where(header,nav,main,aside,section,article,footer)
-  > :where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li):first-child::before {
-  content: var(--bullet);
-  margin-inline: var(--gap);
-  color: var(--bullet-color);
-}
-
-/* If the wrapper’s first content is a list, attach the bullet to the first li */
-:where(h1,h2,h3,h4,h5,h6,p,span,a,strong,em,code,small,li)
-  + :where(header,nav,main,aside,section,article,footer)
-  :where(ul, ol) > li:first-child::before {
-  content: var(--bullet);
-  margin-inline: var(--gap);
-  color: var(--bullet-color);
-}
-
-/* Also add a leading bullet before the first item in the main list only */
-#list > li:first-child::before {
+/* Inline bullets between items for the lists we render */
+#title > li + li::before,
+#covers > li + li::before {
   content: var(--bullet);
   margin-inline: var(--gap);
   color: var(--bullet-color);
@@ -133,44 +89,21 @@ a {
   background: var(--link-bg-color);
   padding: 0 calc(var(--gap) * 0.25);
   overflow-wrap: anywhere;
-  word-break: break-all;
+  /* word-break: break-all; */
   white-space: normal;
-  hyphens: auto;
+  /* hyphens: auto; */
 }
 
-nav a {
-  color: var(--nav-link-color);
-  background: var(--nav-link-bg-color);
-}
+/* nav-specific styles not needed (no <nav> element on this page) */
 
-/* Flattened page list: inline items with bullet separators */
-#page { list-style: none; margin: 0; padding: 0; }
-#page > li { display: inline; }
-#page > li + li::before {
-  content: var(--bullet);
-  margin-inline: var(--gap);
-  color: var(--bullet-color);
-}
+/* #title bullets handled above */
 
-/* Ensure the final explanatory text sits above any overlays */
-.end-text {
-  position: relative;
-  z-index: 9999;
-}
+/* .end-text not used on this page */
 
 /* Restore original nav link styling via class */
 .nav-link { color: var(--nav-link-color); background: var(--nav-link-bg-color); }
 
-/* Header/title + nav: collapse inline whitespace and add bullet before nav */
-header { display: inline-flex; align-items: baseline; }
-header > nav { display: inline-flex; align-items: baseline; }
-header > nav::before {
-  content: var(--bullet);
-  margin-inline: var(--gap);
-  color: var(--bullet-color);
-}
-/* Avoid duplicate bullets from wrapper-based rules inside header nav */
-header nav :where(ul, ol) > li:first-child::before { content: none; margin: 0; }
+/* header/nav rules not used on this page */
 
 /* a:visited {
   color: var(--link-visited-color);

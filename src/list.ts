@@ -41,8 +41,8 @@ async function loadRandomCover(): Promise<void> {
 }
 
 (async () => {
-    const pageEl = document.getElementById('page');
-    if (!pageEl) return;
+    const listEl = document.getElementById('covers');
+    if (!listEl) return;
 
   // visited-links are handled via shared utils
 
@@ -57,7 +57,7 @@ async function loadRandomCover(): Promise<void> {
 
     if (items.length === 0) return;
 
-    const ul = pageEl as HTMLUListElement;
+    const ul = listEl as HTMLUListElement;
     
 		// const countLi = document.createElement('li');
     // countLi.textContent = `Count: ${items.length}`;
@@ -79,14 +79,6 @@ async function loadRandomCover(): Promise<void> {
 		li.appendChild(a);
 		ul.appendChild(li);
 	}
-
-	// Append final text after all items
-	const endLi = document.createElement('li');
-	const em = document.createElement('em');
-	em.textContent = 'The covers are small experiments of things that I find interesting at the moment.';
-	endLi.classList.add('end-text');
-	endLi.appendChild(em);
-	ul.appendChild(endLi);
 
 	// Set up randomize link
 	const randomizeLink = document.querySelector('a.nav-link');
