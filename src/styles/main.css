@@ -2,6 +2,9 @@
 :root {
   --secondary-bg: black;
   --secondary-text: white;
+
+  --unsupported-bg: #ffcccc;
+  --unsupported-text: #660000;
 }
 
 .overlay {
@@ -36,6 +39,11 @@
   background: var(--secondary-bg);
   color: var(--secondary-text);
   padding: 8px 10px;
+}
+
+.overlay.unsupported * {
+  color: var(--unsupported-text);
+  background-color: var(--unsupported-bg);
 }
 
 /* Hover individually for links inside the overlay strip */
