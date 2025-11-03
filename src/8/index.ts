@@ -36,7 +36,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const onScroll = () => {
     const scrollTop = window.scrollY;
+    // console.log(scrollTop);
     updateSplitItems(scrollTop);
+    requestAnimationFrame(onScroll);
   }
 
   const updateSplitItems = (scrollTop: number) => {
@@ -74,7 +76,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   window.addEventListener("resize", onResize);
-  window.addEventListener("scroll", onScroll);
+  // window.addEventListener("scroll", onScroll);
+  
+  requestAnimationFrame(onScroll);
 
   createSplitItems(curveSegments);
   onResize();
