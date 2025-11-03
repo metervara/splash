@@ -132,7 +132,7 @@ section {
   left: calc(-0.5 * var(--content-width));
 }
 
-@media screen and (max-width: 576px){
+@media screen and (max-width: 768px){
   h1 {
     font-size: 15vw;
   }
