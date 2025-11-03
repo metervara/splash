@@ -1,7 +1,7 @@
 import { VerletMass, Spring, Vector2 } from "../shared/physics2d";
 import { initSplashOverlay, map } from "/src/shared/utils";
 
-import { DoubleLoopingWavPlayer } from "./DoubleLoopingWavPlayer.js";
+import { DoubleLoopingWavPlayer } from "../shared/audio/DoubleLoopingWavPlayer.js";
 // import { LoopingWavPlayer } from "./LoopingWavPlayer.js";
 
 import accordionLoop from "./assets/accordion-loop-Amin.wav";

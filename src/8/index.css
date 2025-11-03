@@ -1,0 +1,138 @@
+:root {
+  --headline-color: #ffff00;
+  --text-color: #7d78fd;
+  --bg-color: #111111;
+  --split-height: 35vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%; 
+}
+body {
+  margin: 0;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  text-align: left;
+
+  background-color: var(--bg-color);
+}
+
+h1 {
+  position: fixed;
+  z-index: 2;
+  color: var(--headline-color);
+  inset: 0;
+  margin: 0;
+  font-weight: 400;
+  /* font-size: clamp(2.5rem, 8vw, 8rem); */
+  font-size: 8vw;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: none;
+}
+
+p {
+  font-size: max(1.5vw, 16px);
+  word-break: break-all;
+}
+
+main {
+  margin: 0 auto;
+  width: 48.5vw;
+  padding-top: 75vh;
+  padding-bottom: 75vh;
+}
+
+section {
+  border: 1px solid yellow;
+  /* background: linear-gradient(0deg, white, blue 80%) no-repeat; */
+}
+
+.split {
+  --angle: 0deg;
+  --offset: 0px;
+}
+
+.left {
+  position: fixed;
+  z-index: 1;
+  
+  inset: var(--split-height) 50% var(--split-height) 0;
+  
+  /* background: green; */
+  & > .item {
+    border: 1px dashed red;
+    transform-origin: right center;
+  }
+}
+
+.left::after {
+  z-index: -1;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  background: #330000;
+}
+
+.right {
+  position: fixed;
+  z-index: 3;
+  
+  inset: var(--split-height) 0 var(--split-height) 50%;
+  & > .item {
+    border: 1px dashed green;
+    transform-origin: left center;
+  }
+}
+
+.split .item {
+  position: relative;
+  width:100%;
+  height: var(--split-segment-height);
+
+  transform: translateX(var(--offset)) skewX(var(--angle));
+  overflow: hidden;
+}
+
+.split .item main {
+  position: absolute;
+
+  top: calc(-1 * (var(--split-top) + var(--top)));
+
+  width: var(--content-width);
+  height: var(--content-height);
+
+  transform: translate(0, var(--scroll-top));
+
+  /* optional: isolate to avoid painting spillover with heavy effects */
+  contain: paint layout style;
+}
+
+.split .left .item main {
+  left: 25vw;
+}
+.split .right .item main {
+  left: -25vw;
+}
+
+@media screen and (max-width: 576px){
+  h1 {
+    font-size: 15vw;
+  }
+  main {
+    width: 90vw;
+  }
+}
