@@ -30,8 +30,9 @@ h1 {
   inset: 0;
   margin: 0;
   font-weight: 400;
+  font-style: normal;
   /* font-size: clamp(2.5rem, 8vw, 8rem); */
-  font-size: 8vw;
+  font-size: 14vw;
   line-height: 1.1;
   letter-spacing: 0.02em;
   display:flex;
@@ -42,13 +43,26 @@ h1 {
 }
 
 p {
-  font-size: max(1.5vw, 16px);
+  font-size: 2vw;
   word-break: break-all;
+  font-weight: 700;
+  font-style: normal;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  & span {
+    display: inline-block;
+    text-transform: uppercase;
+    /* background-color: rgba(17, 17, 17, 0.75); */
+    background-color: blue;
+    /* text-shadow: red 2px 2px; */
+  }
 }
 
 main {
   margin: 0 auto;
-  width: 48.5vw;
+  /* width: 48.5vw; */
   padding-top: 75vh;
   padding-bottom: 75vh;
 }
@@ -59,10 +73,6 @@ body > main.scroll-host {
   pointer-events: none;
 }
 
-section {
-  /* border: 1px solid yellow; */
-  background: linear-gradient(0deg, white, blue 80%) no-repeat;
-}
 
 .split {
   --angle: 0deg;
@@ -106,7 +116,8 @@ section {
   left: 0;
   width: 100vw;
   height: 100%;
-  background: #330000;
+  
+  background-color: var(--bg-color);
 }
 
 .right {
@@ -127,6 +138,7 @@ section {
 
   transform: translateX(var(--offset)) skewX(var(--angle));
   overflow: hidden;
+  
 
   /* border: 1px dashed red; */
 }
@@ -143,6 +155,7 @@ section {
 
   /* optional: isolate to avoid painting spillover with heavy effects */
   contain: paint layout style;
+
 }
 
 .split .left .item main {
@@ -154,11 +167,11 @@ section {
   left: calc(-0.5 * var(--content-width));
 }
 
-@media screen and (max-width: 768px){
+/* @media screen and (max-width: 768px){
   h1 {
     font-size: 15vw;
   }
   main {
     width: 90vw;
   }
-}
+} */
