@@ -38,7 +38,7 @@ h1 {
   align-items: center;
   justify-content: center;
 
-  pointer-events: none;
+  /* pointer-events: none; */
 }
 
 p {
@@ -53,6 +53,12 @@ main {
   padding-bottom: 75vh;
 }
 
+/* Keep original main in flow for scroll height but hide it visually */
+body > main.scroll-host {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 section {
   /* border: 1px solid yellow; */
   background: linear-gradient(0deg, white, blue 80%) no-repeat;
@@ -61,6 +67,22 @@ section {
 .split {
   --angle: 0deg;
   --offset: 0px;
+}
+
+/* Overlay that holds the full, transform-driven clone */
+.follower {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  /* pointer-events: none; */
+  overflow: hidden;
+}
+
+.follower > main {
+  position: relative;
+  transform: translate(0, var(--scroll-top));
+  margin: 0 auto;
+  will-change: transform;
 }
 
 .left {

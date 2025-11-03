@@ -8,11 +8,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const splitHeight = 30;
   const curveHeightRatio = 0.1;
   const main = document.querySelector("main") as HTMLElement;
+  const follower = document.querySelector(".follower") as HTMLElement;
   const split = document.querySelector(".split") as HTMLElement;
   const left = document.querySelector(".split > .left") as HTMLElement;
   const right = document.querySelector(".split > .right") as HTMLElement;
   const itemsLeft: HTMLElement[] = [];
   const itemsRight: HTMLElement[] = [];
+  let mainClone: HTMLElement | null = null;
 
   const createSplitItems = (curveSegments: number) => {
     const content = document.querySelector("main") as HTMLElement;
@@ -20,6 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (let i = 0; i < curveSegments; i++) {
       const cloneL = content.cloneNode(true) as HTMLElement;
       const cloneR = content.cloneNode(true) as HTMLElement;
+      cloneL.classList.remove("scroll-host");
+      cloneR.classList.remove("scroll-host");
 
       const itemL = document.createElement("div");
       const itemR = document.createElement("div");
@@ -36,17 +40,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const onScroll = () => {
     const scrollTop = window.scrollY;
-    // console.log(scrollTop);
-    updateSplitItems(scrollTop);
+    // Drive scroll via global CSS var so both base clone and slices are in sync
+    document.documentElement.style.setProperty("--scroll-top", `${-scrollTop}px`);
     requestAnimationFrame(onScroll);
   }
 
-  const updateSplitItems = (scrollTop: number) => {
-    for (let i = 0; i < curveSegments; i++) {
-      itemsLeft[i].style.setProperty("--scroll-top", `${-scrollTop}px`);
-      itemsRight[i].style.setProperty("--scroll-top", `${-scrollTop}px`);
-    }
-  }
+  // Removed per-item scroll updates; global CSS var now drives transforms
 
   const onResize = () => {
     const splitMarginHeight = (100 - splitHeight) / 2.0;
@@ -79,6 +78,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // window.addEventListener("scroll", onScroll);
   
   requestAnimationFrame(onScroll);
+
+  // Prepare original main as scroll host only
+  main.classList.add("scroll-host");
+
+  // Create a full, transform-driven clone for base content
+  mainClone = main.cloneNode(true) as HTMLElement;
+  mainClone.classList.remove("scroll-host");
+  follower.appendChild(mainClone);
 
   createSplitItems(curveSegments);
   onResize();
