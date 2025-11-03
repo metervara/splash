@@ -1,8 +1,21 @@
 :root {
   --headline-color: #ffff00;
-  --text-color: #7d78fd;
+  /* --text-color: #7d78fd; */
   --bg-color: #111111;
   --split-height: 35vh;
+  
+  --shadow-color: var(--bg-color);/* red;/* rgba(17, 17, 17, 0.5); */
+  --shadow-offset: 0.5vw;
+  
+  --content-bg-color: blue;
+  --content-bg-color-dark: #000099;
+  --content-bg-color-light: #3131fd;
+  
+  --text-color: #ffff00;
+  --text-color-dark: #8686ff;
+  --text-color-light: #fefe99;
+
+  --peak: 0%;
 }
 
 * {
@@ -39,25 +52,32 @@ h1 {
   align-items: center;
   justify-content: center;
 
+  text-shadow: var(--shadow-offset) var(--shadow-offset) var(--shadow-color);
+
   /* pointer-events: none; */
 }
 
 p {
   font-size: 2vw;
-  word-break: break-all;
-  font-weight: 700;
-  font-style: normal;
   display: flex;
   flex-direction: column;
+  gap: 0.5em;
   align-items: center;
   
   & span {
+    padding: 0 0.25em;
     display: inline-block;
-    text-transform: uppercase;
-    /* background-color: rgba(17, 17, 17, 0.75); */
-    background-color: blue;
-    /* text-shadow: red 2px 2px; */
+    white-space: nowrap;
+    /* background-color: var(--content-bg-color); */
+    background-color: color-mix(in srgb, var(--content-bg-color-dark) var(--peak), var(--content-bg-color) calc(100% - var(--peak)));
+    color: color-mix(in srgb, var(--text-color-dark) var(--peak), var(--text-color) calc(100% - var(--peak)));
+    box-shadow: var(--shadow-offset) var(--shadow-offset) var(--shadow-color);
   }
+}
+
+.right span {
+  background-color: color-mix(in srgb, var(--content-bg-color-light) var(--peak), var(--content-bg-color) calc(100% - var(--peak)));
+  color: color-mix(in srgb, var(--text-color-light) var(--peak), var(--text-color) calc(100% - var(--peak)));
 }
 
 main {

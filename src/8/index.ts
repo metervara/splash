@@ -20,17 +20,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const content = document.querySelector("main") as HTMLElement;
 
     for (let i = 0; i < curveSegments; i++) {
+      // const peakPercentage = i / (curveSegments - 1) * 100;
+      const t = i / (curveSegments - 1);
+      const peakPercentage = (1 - Math.abs(2 * t - 1)) * 100;
+
+      // const t = (i + 0.5) / curveSegments;
+      // const peakPercentage = (1 - Math.abs(2 * t - 1)) * 100;
+
+      
       const cloneL = content.cloneNode(true) as HTMLElement;
       const cloneR = content.cloneNode(true) as HTMLElement;
       cloneL.classList.remove("scroll-host");
       cloneR.classList.remove("scroll-host");
-
       const itemL = document.createElement("div");
       const itemR = document.createElement("div");
       itemL.appendChild(cloneL);
       itemR.appendChild(cloneR);
       itemL.classList.add("item");
       itemR.classList.add("item");
+      itemL.style.setProperty("--peak", `${peakPercentage}%`);
+      itemR.style.setProperty("--peak", `${peakPercentage}%`);
       left.appendChild(itemL);
       right.appendChild(itemR);
       itemsLeft.push(itemL);
@@ -57,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     split.style.setProperty("--split-top", `${left.offsetTop}px`);
     
     const angles = bellCurveSegmentAngles(curveSegments, curveWidth, curveHeight, { units: "deg" });
-    console.log(angles);
+    
     for (let i = 0; i < curveSegments; i++) {
       itemsLeft[i].style.setProperty("--angle", `${-angles.angles[i]}deg`);
       itemsLeft[i].style.setProperty("--offset", `${-angles.offsets[i]}px`);
