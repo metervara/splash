@@ -24,10 +24,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const t = i / (curveSegments - 1);
       const peakPercentage = (1 - Math.abs(2 * t - 1)) * 100;
 
-      // const t = (i + 0.5) / curveSegments;
-      // const peakPercentage = (1 - Math.abs(2 * t - 1)) * 100;
-
-      
       const cloneL = content.cloneNode(true) as HTMLElement;
       const cloneR = content.cloneNode(true) as HTMLElement;
       cloneL.classList.remove("scroll-host");
@@ -47,11 +43,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  const onScroll = () => {
+  const syncWithScroll = () => {
     const scrollTop = window.scrollY;
     // Drive scroll via global CSS var so both base clone and slices are in sync
     document.documentElement.style.setProperty("--scroll-top", `${-scrollTop}px`);
-    requestAnimationFrame(onScroll);
+    requestAnimationFrame(syncWithScroll);
   }
 
   // Removed per-item scroll updates; global CSS var now drives transforms
@@ -79,14 +75,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const contentWidth = main.offsetWidth;
     const contentHeight = main.offsetHeight;
+
+    // Safari can report 0 on first load before layout settles; try again next frame
+    if (contentWidth === 0 || contentHeight === 0) {
+      requestAnimationFrame(onResize);
+      return;
+    }
+
     split.style.setProperty("--content-width", `${contentWidth}px`);
     split.style.setProperty("--content-height", `${contentHeight}px`);
   };
 
+  // Ensure initial measure happens after layout/paint
+  const runInitialResize = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(onResize);
+    });
+  };
+
   window.addEventListener("resize", onResize);
-  // window.addEventListener("scroll", onScroll);
+  // window.addEventListener("scroll", syncWithScroll);
   
-  requestAnimationFrame(onScroll);
+  requestAnimationFrame(syncWithScroll);
 
   // Prepare original main as scroll host only
   main.classList.add("scroll-host");
@@ -97,7 +107,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   follower.appendChild(mainClone);
 
   createSplitItems(curveSegments);
-  onResize();
+  runInitialResize();
+  // Fallback: run once after full load (CSS/fonts/images) for Safari
+  window.addEventListener("load", onResize, { once: true });
   
   await initSplashOverlay();
 });
