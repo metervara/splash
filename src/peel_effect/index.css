@@ -1,0 +1,103 @@
+:root {
+  --text-color: #7d78fd;
+  --bg-color: #111111;
+
+  --text-bg-color-even: blue;
+  --text-bg-color-odd: darkblue;
+  
+  --back-bg-color: red;
+  --back-text-color: green;
+
+  /* Peel variables (set by JS) */
+  --peel-rotation: 0deg;  /* crease orientation (perpendicular to pointer direction) */
+  --peel-pct: 0%;         /* peel amount [0% = fully peeled, 100% = not peeled] */
+}
+
+html, body {
+  height: 100%; 
+}
+body {
+  margin: 0;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  text-align: center;
+
+  background-color: var(--bg-color);
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15vw;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.letter {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+
+  /* Rotate the entire letter so the horizontal split = crease at --peel-rotation */
+  transform: rotate(var(--peel-rotation));
+  transform-origin: center;
+
+  user-select: none;
+  cursor: default;
+}
+
+.letter .front {
+  position: relative;
+  display: grid;
+  place-items: center;
+  
+  /* Clip below the crease line, extend well beyond bounds to handle rotation */
+  /* Offset crease by -50% to account for rotated content extending beyond natural bounds */
+  clip-path: polygon(
+    -200% calc(var(--peel-pct) - 50%),
+    300% calc(var(--peel-pct) - 50%),
+    300% 300%,
+    -200% 300%
+  );
+}
+
+/* .letter:nth-child(odd)  .front { background: var(--text-bg-color-odd); }
+.letter:nth-child(even) .front { background: var(--text-bg-color-even); } */
+
+/* Keep text upright in both front and back */
+.letter .front .inner,
+.letter .back .inner {
+  transform: rotate(calc(-1 * var(--peel-rotation)));
+}
+
+.letter .front .inner {
+  color: var(--text-color);
+  background: blue;
+}
+
+.letter .back {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  
+  /* Clip above the crease line, extend well beyond bounds to handle rotation */
+  /* Offset crease by -50% to account for rotated content extending beyond natural bounds */
+  clip-path: polygon(
+    -200% -200%,
+    300% -200%,
+    300% calc(var(--peel-pct) - 50%),
+    -200% calc(var(--peel-pct) - 50%)
+  );
+  
+  /* Mirror across the crease line at var(--peel-pct) */
+  transform: scaleY(-1);
+  transform-origin: 50% calc(var(--peel-pct) - 50%);
+}
+
+.letter .back .inner {
+  color: var(--back-text-color);
+  background: var(--back-bg-color);
+}
