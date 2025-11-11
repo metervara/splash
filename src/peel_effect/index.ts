@@ -10,11 +10,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Configuration
   const MIN_DISTANCE = 0;       // px where peel reaches max (0 = at element)
   const MAX_DISTANCE_VW = 50;   // vw where peel reaches 0
-  const PEEL_MAX = 100;         // % of height (100 = fully peeled)
+  const PEEL_MAX = 120;         // % of height (100 = fully peeled)
 
   const letters = document.querySelectorAll("h1 .letter") as NodeListOf<HTMLElement>;
   let pointerX = 0;
   let pointerY = 0;
+  let pointerFollowX = 0;
+  let pointerFollowY = 0;
+
   let maxDistancePx = vwToPx(MAX_DISTANCE_VW);
 
   const updateLetterPeel = (letter: HTMLElement, clientX: number, clientY: number) => {
@@ -38,15 +41,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     const t = Math.min((maxDistancePx - distance) / (maxDistancePx - MIN_DISTANCE), 1);
     const peelPct = t * PEEL_MAX;
 
+    // Set z-index based on inverse of distance (closer = higher z-index)
+    // Use a large base value to avoid negative z-index
+    const zIndex = Math.max(0, Math.round(10000 - distance));
+
     letter.style.setProperty('--peel-rotation', `${creaseDeg}deg`);
     letter.style.setProperty('--peel-pct', `${peelPct.toFixed(3)}%`);
+    letter.style.zIndex = `${zIndex}`;
   };
 
   const tick = () => {
     requestAnimationFrame(tick);
 
+    pointerFollowX += (pointerX - pointerFollowX) * 0.1;
+    pointerFollowY += (pointerY - pointerFollowY) * 0.1;
+
     letters.forEach((letter: HTMLElement) => {
-      updateLetterPeel(letter, pointerX, pointerY);
+      updateLetterPeel(letter, pointerFollowX, pointerFollowY);
     });
   };
 

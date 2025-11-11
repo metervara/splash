@@ -5,8 +5,9 @@
   --text-bg-color-even: blue;
   --text-bg-color-odd: darkblue;
   
-  --back-bg-color: red;
-  --back-text-color: green;
+  --back-bg-color-even: #00ffff;
+  --back-bg-color-odd: #ff00ff;
+  --back-text-color: #7d78fd;
 
   /* Peel variables (set by JS) */
   --peel-rotation: 0deg;  /* crease orientation (perpendicular to pointer direction) */
@@ -63,18 +64,20 @@ h1 {
   );
 }
 
-/* .letter:nth-child(odd)  .front { background: var(--text-bg-color-odd); }
-.letter:nth-child(even) .front { background: var(--text-bg-color-even); } */
+.letter .front .inner {
+  color: var(--text-color);
+}
+
+.letter:nth-child(odd)  .front .inner{ background: var(--text-bg-color-odd); }
+.letter:nth-child(even) .front .inner{ background: var(--text-bg-color-even); }
+
+.letter:nth-child(odd)  .back .inner{ background: var(--back-bg-color-odd); }
+.letter:nth-child(even) .back .inner{ background: var(--back-bg-color-even); }
 
 /* Keep text upright in both front and back */
 .letter .front .inner,
 .letter .back .inner {
   transform: rotate(calc(-1 * var(--peel-rotation)));
-}
-
-.letter .front .inner {
-  color: var(--text-color);
-  background: blue;
 }
 
 .letter .back {
@@ -99,5 +102,4 @@ h1 {
 
 .letter .back .inner {
   color: var(--back-text-color);
-  background: var(--back-bg-color);
 }
