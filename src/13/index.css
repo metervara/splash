@@ -5,9 +5,9 @@
   --text-bg-color-even: blue;
   --text-bg-color-odd: darkblue;
   
-  --back-bg-color-even: #00ffff;
-  --back-bg-color-odd: #ff00ff;
-  --back-text-color: #7d78fd;
+  --back-bg-color-even: rgb(61, 61, 124);
+  --back-bg-color-odd: #2d2d4f;
+  --back-text-color: rgba(129, 128, 160, 0.25);
 
   /* Peel variables (set by JS) */
   --peel-rotation: 0deg;  /* crease orientation (perpendicular to pointer direction) */
@@ -15,7 +15,9 @@
 }
 
 html, body {
-  height: 100%; 
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 body {
   margin: 0;

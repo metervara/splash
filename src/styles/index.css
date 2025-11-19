@@ -1,0 +1,60 @@
+
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  
+}
+
+html, body {
+  width: 100vw;
+  height: 100lvh;
+  overflow: hidden;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+  
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--default-font-weight);
+  font-variation-settings: "wdth" var(--default-font-weight);
+  /* line-height: 1.2; */
+}
+
+/* button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+} */
+
+h1, h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+h3 {
+  font-weight: var(--default-font-weight);
+  font-variation-settings: "wdth" var(--default-font-weight);
+}
+
+h1 {
+  color: var(--header-main-color);
+  font-size: max(2rem, min(8vw, 15vh));
+  line-height: 1;
+}
+
+h2 {
+  color: var(--header-sub-color);
+  position: absolute;
+  bottom: calc(100% + var(--block-gap) * 2);
+  left: 0;
+  /* font-size: max(3rem, min(15vw, 22vh)); */
+  font-size: max(2rem, min(8vw, 15vh));
+  line-height: 1;
+}

@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const MIN_DISTANCE = 0;       // px where peel reaches max (0 = at element)
   const MAX_DISTANCE_VW = 50;   // vw where peel reaches 0
   const PEEL_MAX = 120;         // % of height (100 = fully peeled)
+  const MAX_ANGLE_DELTA = 5;   // degrees per frame - caps how fast angle can change
 
   const letters = document.querySelectorAll("h1 .letter") as NodeListOf<HTMLElement>;
   let pointerX = 0;
@@ -19,6 +20,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   let pointerFollowY = 0;
 
   let maxDistancePx = vwToPx(MAX_DISTANCE_VW);
+
+  // Store current angle for each letter to smooth transitions
+  const letterAngles = new Map<HTMLElement, number>();
 
   const updateLetterPeel = (letter: HTMLElement, clientX: number, clientY: number) => {
     const rect = letter.getBoundingClientRect();
@@ -32,7 +36,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     const phiDeg = Math.atan2(dy, dx) * 180 / Math.PI;
 
     // Crease must be perpendicular to that vector → rotate by φ + 90°
-    const creaseDeg = phiDeg + 90;
+    const targetCreaseDeg = phiDeg + 90;
+
+    // Get current angle or initialize it
+    let currentCreaseDeg = letterAngles.get(letter) ?? targetCreaseDeg;
+
+    // Calculate shortest angular distance (handles wrapping)
+    let angleDelta = targetCreaseDeg - currentCreaseDeg;
+    // Normalize to [-180, 180] range
+    while (angleDelta > 180) angleDelta -= 360;
+    while (angleDelta < -180) angleDelta += 360;
+
+    // Cap the delta to prevent aggressive movement
+    angleDelta = Math.max(-MAX_ANGLE_DELTA, Math.min(MAX_ANGLE_DELTA, angleDelta));
+
+    // Update current angle with capped delta
+    currentCreaseDeg += angleDelta;
+    letterAngles.set(letter, currentCreaseDeg);
 
     // Distance from center of letter to pointer
     const distance = Math.hypot(dx, dy);
@@ -45,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Use a large base value to avoid negative z-index
     const zIndex = Math.max(0, Math.round(10000 - distance));
 
-    letter.style.setProperty('--peel-rotation', `${creaseDeg}deg`);
+    letter.style.setProperty('--peel-rotation', `${currentCreaseDeg}deg`);
     letter.style.setProperty('--peel-pct', `${peelPct.toFixed(3)}%`);
     letter.style.zIndex = `${zIndex}`;
   };
@@ -53,8 +73,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tick = () => {
     requestAnimationFrame(tick);
 
-    pointerFollowX += (pointerX - pointerFollowX) * 0.1;
-    pointerFollowY += (pointerY - pointerFollowY) * 0.1;
+    pointerFollowX += (pointerX - pointerFollowX) * 0.2;
+    pointerFollowY += (pointerY - pointerFollowY) * 0.2;
 
     letters.forEach((letter: HTMLElement) => {
       updateLetterPeel(letter, pointerFollowX, pointerFollowY);

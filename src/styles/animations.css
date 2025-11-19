@@ -1,0 +1,35 @@
+/* CSS-only frames animation for Metervara header */
+.tfx-metervara {
+  color:transparent;
+}
+
+.tfx-metervara::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "metervara.";
+  color: var(--header-sub-color);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  pointer-events: none;
+  
+  animation-name: centerReveal;
+  animation-timing-function: steps(1, end);
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+
+  animation-duration: 800ms;
+  animation-delay: 750ms;
+}
+
+@keyframes centerReveal {
+  0% { content: "    ▁    "; }
+  14.286% { content: "   ▁▄▁   "; }
+  28.571% { content: "  ▁▄r▄▁  "; }
+  42.857% { content: " ▁▄erv▄▁ "; }
+  57.143% { content: "▁▄terva▄▁"; }
+  71.429% { content: "▄etervar▄▁"; }
+  85.714% { content: "metervara▄"; }
+  100% { content: "Metervara."; }
+}

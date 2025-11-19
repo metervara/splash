@@ -3,26 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Metervara Covers</title>
+    <title>Metervara Sketches</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,300&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/src/styles/reset.css" />
-    <link rel="stylesheet" href="/src/styles/list.css" />
+    <link rel="stylesheet" href="/src/styles/animations.css">
+    <link rel="stylesheet" href="/src/styles/index.css" />
   </head>
   <body>
-    <section>
-      <ul id="title"><li><h1>Metervara Covers</h1></li><li><a href="#" class="nav-link">Load random cover</a></li></ul>
-    </section>
-    <section>
-      <ul id="covers"></ul>
-    </section>
-    <section>
-      <em>The covers are small, playful experiments in motion, layout, and interaction.</em>
-    </section>
-    <script type="module" src="/src/list.ts"></script>
+    <div id="measure-viewport"></div>
+    <div id="grid"></div>
+    <div class="fixed-header">
+      <h2 class="tfx-metervara">Metervara.</h2>
+    </div>
+    <header id="header" class="fixed-header">
+      <h1>Sketches.</h1>
+      <p class="description">These sketches are small, playful experiments in motion, layout, and interaction.</p>
+    </header>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
