@@ -14,6 +14,8 @@ const DRAG = 0.01;
 const VELOCITY_SCALE = 50;
 const POINT_LIFETIME_MS = 5000; // 1 second
 
+let oddEven = false
+
 class RibbonMain {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
@@ -28,7 +30,7 @@ class RibbonMain {
   private previousPointerPosition: Vector2 = new Vector2(0, 0);
   private previousPointerDelta: Vector2 = new Vector2(0, 0);
   private lastPointerMoveTime: number = 0;
-  private points: { mass: VerletMass, created: Date }[] = [];
+  private points: { mass: VerletMass, created: Date, oddEven: boolean }[] = [];
 
   // Spawning configuration
   private maxDistanceToSpawn: number = Number.MAX_SAFE_INTEGER; // Spawn if distance exceeds this
@@ -71,7 +73,8 @@ class RibbonMain {
     }
     // First point starts with zero velocity (stays at pointer position)
     
-    this.points.push({ mass, created: new Date() });
+    this.points.push({ mass, created: new Date(), oddEven });
+    oddEven = !oddEven;
   }
 
   resize(): void {
@@ -159,7 +162,7 @@ class RibbonMain {
       this.spawnPoint();
     }
 
-    // this.killPoints();
+    this.killPoints();
 
     if(this.points.length > this.maxPoints) {
       this.points.shift();
@@ -263,17 +266,19 @@ class RibbonMain {
   render(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const allPoints = [...this.points.map(p => p.mass.position), this.pointerPosition];
+    const allPoints = [...this.points.map(p => {return {position: p.mass.position, oddEven: p.oddEven}}), {position: this.pointerPosition, oddEven: false}];
     const quads = getQuads(allPoints, this.thickness);
 
-    this.context.strokeStyle = "blue";
+    this.context.strokeStyle = "#ff00ff";
     for (const quad of quads) {
+      this.context.fillStyle = quad.oddEven ? "blue" : "#000099";
       this.context.beginPath();
       this.context.moveTo(quad.p0.x, quad.p0.y);
       this.context.lineTo(quad.p1.x, quad.p1.y);
       this.context.lineTo(quad.p2.x, quad.p2.y);
       this.context.lineTo(quad.p3.x, quad.p3.y);
       this.context.closePath();
+      this.context.fill();
       this.context.stroke();
     }
 
