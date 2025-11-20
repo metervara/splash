@@ -47,8 +47,20 @@ export class Vector2 {
 		return new Vector2(0, 0);
 	}
 
+	clone(): Vector2 {
+		return new Vector2(this.x, this.y);
+	}
+
 	static sub(vec0: Vector2, vec1: Vector2): Vector2 {
 		return new Vector2(vec0.x - vec1.x, vec0.y - vec1.y);
+	}
+
+	static add(vec0: Vector2, vec1: Vector2): Vector2 {
+		return new Vector2(vec0.x + vec1.x, vec0.y + vec1.y);
+	}
+
+	static mul(vec: Vector2, f: number): Vector2 {
+		return new Vector2(vec.x * f, vec.y * f);
 	}
 
 	static distance(vec0: Vector2, vec1: Vector2): number {
@@ -56,5 +68,8 @@ export class Vector2 {
     const dy = vec0.y - vec1.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
-}
 
+	static dot(vec0: Vector2, vec1: Vector2): number {
+		return vec0.x * vec1.x + vec0.y * vec1.y;
+	}
+}

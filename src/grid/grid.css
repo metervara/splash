@@ -1,9 +1,9 @@
 :root {
   /* layout */
-  --rows: 1;
-  --cols: 1;
-  --block-width: 100px;
-  --block-height: 100px;
+  --rows: 0;
+  --cols: 0;
+  --block-width: 100vw;
+  --block-height: 100vh;
   --block-gap: 10px;
   --header-row: -1; /* What row is the header, that the items 'avoid'
 
@@ -157,11 +157,23 @@
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  padding: var(--block-gap);
+  padding: calc(var(--block-gap) * 0.5);
   & h3, & p {
-    display: inline;
-    padding: 0 5px;
-    background-color: rgba(0, 0, 0, 0.5);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-style: normal;
+    display: inline-block;
+    padding: 8px 10px;
+    /* padding: 0 5px; */
+    /* background-color: rgba(0, 0, 0, 0.5); */
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-user-select: none;
+    background-color: black;
+    color: white;
   }
 }
 
@@ -249,7 +261,6 @@
 
 .fixed-header {
   position: fixed;
-  z-index: 10;
   width: 100%;
   top: calc(var(--header-row) * (var(--block-height) + var(--block-gap)));
   height: var(--block-height);

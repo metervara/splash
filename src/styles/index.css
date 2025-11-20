@@ -21,6 +21,9 @@ html, body {
   font-weight: var(--default-font-weight);
   font-variation-settings: "wdth" var(--default-font-weight);
   /* line-height: 1.2; */
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* button {
@@ -38,10 +41,29 @@ h1, h2 {
   font-style: normal;
 }
 
-h3 {
+h3{
   font-weight: var(--default-font-weight);
   font-variation-settings: "wdth" var(--default-font-weight);
 }
+
+p.description {
+
+  display: block;
+  font-size: 1.17em;
+  padding-top: 20px;
+  font-weight: var(--default-font-weight);
+  font-variation-settings: "wdth" var(--default-font-weight);
+  max-width: 700px;
+
+
+  & span {
+    display: inline;
+    background-color: var(--header-main-color); /*var(--tag-header-background-color); */
+    color: var(--background-color); /* var(--tag-header-text-color); */
+    /* padding: 2px 0; */
+  }
+}
+
 
 h1 {
   color: var(--header-main-color);

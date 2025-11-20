@@ -29,6 +29,22 @@ export class VerletMass implements PointMass {
     }
   }
 
+  /**
+   * Set initial velocity for Verlet integration.
+   * In Verlet, velocity is implicit from position differences, so we set prevPosition
+   * such that (position - prevPosition) / dt = velocity.
+   * @param vx - Initial velocity x component
+   * @param vy - Initial velocity y component
+   * @param dt - Timestep used in integration (typically your fixedDelta)
+   */
+  setVelocity(vx: number, vy: number, dt: number): void {
+    this.velocity.x = vx;
+    this.velocity.y = vy;
+    // Set prevPosition so that (position - prevPosition) / dt = velocity
+    this.prevPosition.x = this.position.x - vx * dt;
+    this.prevPosition.y = this.position.y - vy * dt;
+  }
+
   integrate(dt: number): void {
     if (this.mass === 0) { this.force.x = 0; this.force.y = 0; this.prevPosition.x = this.position.x; this.prevPosition.y = this.position.y; return; }
 
