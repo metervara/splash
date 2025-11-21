@@ -69,7 +69,7 @@ class RibbonMain {
     if (this.points.length > 0 && deltaLength * 10 > minVelocityThreshold) {
       // Set initial velocity based on pointer movement for subsequent points
       const initialVelocity = Vector2.mul(this.pointerDelta, VELOCITY_SCALE); // Scale as needed
-      mass.setVelocity(initialVelocity.x, initialVelocity.y, this.fixedDelta);
+      mass.setVelocity(-initialVelocity.x, -initialVelocity.y, this.fixedDelta);
     }
     // First point starts with zero velocity (stays at pointer position)
     

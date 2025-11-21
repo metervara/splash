@@ -1,6 +1,6 @@
 import { Vector2 } from "../shared/physics2d/Vector2";
 
-const MIN_SEGMENT_LENGTH = 1e-3;
+const MIN_SEGMENT_LENGTH = 50; //1e-3;
 
 export interface SegmentQuad {
   p0: Vector2;
