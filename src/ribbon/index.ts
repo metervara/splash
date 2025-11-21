@@ -39,6 +39,7 @@ class RibbonMain {
   // private angleThreshold: number = 90; // Angle threshold in degrees for segment-to-segment comparison
   private movementAngleThreshold: number = 90; // Angle threshold in degrees for movement vs segment direction
   private readonly maxPoints: number = 10;
+  private ribbonLength: number = 0;
 
   constructor() {
     const container = document.createElement("div");
@@ -266,8 +267,15 @@ class RibbonMain {
 
   render(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+    
+    
     const allPoints = [...this.points.map(p => {return {position: p.mass.position, oddEven: p.oddEven}}), {position: this.pointerPosition, oddEven: false}];
+    this.ribbonLength = allPoints.reduce((total, currentPoint, index) => {
+      if (index === 0) return total;
+      const previousPoint = allPoints[index - 1];
+      return total + Vector2.distance(previousPoint.position, currentPoint.position);
+    }, 0);
+    
     const quads = getQuads(allPoints, this.thickness);
 
     this.context.strokeStyle = "#ff00ff";
@@ -297,10 +305,10 @@ class RibbonMain {
 
     // draw ribbon line (for debugging purposes)
     this.context.beginPath();
-    this.context.moveTo(allPoints[0].x, allPoints[0].y);
+    this.context.moveTo(allPoints[0].position.x, allPoints[0].position.y);
     
     for (let i = 1; i < allPoints.length; i++) {
-      this.context.lineTo(allPoints[i].x, allPoints[i].y);
+      this.context.lineTo(allPoints[i].position.x, allPoints[i].position.y);
     } // end at mouse position
     this.context.stroke();
     /*
