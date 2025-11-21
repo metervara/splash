@@ -340,7 +340,7 @@ class RibbonMain {
           
           const gradient = this.createGradient(partial0, partialQuad.p1, normalizeLength(lengthTraveledStart), normalizeLength(lengthTraveledEnd));
           this.context.fillStyle = gradient; //partialQuad.oddEven ? "blue" : "#000099";
-
+          // this.context.strokeStyle = partialQuad.oddEven ? "white" : "green";
           this.context.beginPath();
           this.context.moveTo(partial0.x, partial0.y);
           this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
@@ -350,7 +350,7 @@ class RibbonMain {
           
           this.context.closePath();
           this.context.fill();
-          this.context.stroke();
+          // this.context.stroke();
 
           lengthTraveled += visibleLength;
         }
@@ -365,7 +365,8 @@ class RibbonMain {
       // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
 
       const gradient = this.createGradient(quad.p0, quad.p1, normalizeLength(lengthTraveledStart), normalizeLength(lengthTraveledEnd));
-      this.context.fillStyle = gradient; //quad.oddEven ? "blue" : "#000099";
+      this.context.fillStyle = gradient; //quad.oddEven ? "blue" : "#000099";'
+      // this.context.strokeStyle = quad.oddEven ? "white" : "green";
       this.context.beginPath();
       this.context.moveTo(quad.p0.x, quad.p0.y);
       this.context.lineTo(quad.p1.x, quad.p1.y);
