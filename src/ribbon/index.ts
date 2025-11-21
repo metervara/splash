@@ -1,7 +1,7 @@
 import { VerletMass, Vector2 } from "../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
 import { getQuads } from "./quads";
-import { lerpRGB } from "../shared/utils";
+import { lerpRGB, clamp } from "../shared/utils";
 
 // const colors = [
 //   ["#df0049", "#660671"], // red
@@ -146,7 +146,19 @@ class RibbonMain {
 
   private createGradient(fromPosition: Vector2, toPosition: Vector2, from: number, to: number): CanvasGradient {
     const gradient = this.context.createLinearGradient(fromPosition.x, fromPosition.y, toPosition.x, toPosition.y);
-    
+    /*
+    const startColor = [255, 0, 0];
+    const endColor = [0, 0, 255];
+
+    const fromNorm = clamp(from, 0, 1);
+    const toNorm = clamp(to, 0, 1);
+
+    const color1 = lerpRGB(startColor, endColor, fromNorm);
+    const color2 = lerpRGB(startColor, endColor, toNorm); 
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    */
+
     const startColor = [255, 0, 0];
     const startColorDark = [128, 0, 0];
     const endColor = [0, 0, 255];
@@ -155,6 +167,7 @@ class RibbonMain {
     const colorDark = lerpRGB(startColorDark, endColorDark, from);
     gradient.addColorStop(0, color);
     gradient.addColorStop(1, colorDark);
+    
     return gradient;
 
   }
@@ -298,6 +311,7 @@ class RibbonMain {
     // let gradData = []
 
     let lengthTraveled = 0;
+    const normalizeLength = (value: number) => clamp(value / this.maxRibbonLength, 0, 1);
 
     const quads = getQuads(this.allPoints, this.thickness);
     if(this.ribbonLength > this.maxRibbonLength) {
@@ -307,33 +321,39 @@ class RibbonMain {
       if(partialQuad) {
         const segmentLength = partialQuad.length;
         const excessLength = this.ribbonLength - this.maxRibbonLength;
-        const partialPercentage = excessLength / segmentLength;
-        const partialLength = segmentLength * partialPercentage;
+        const trimmedFraction = clamp(excessLength / segmentLength, 0, 1);
+        const visibleFraction = 1 - trimmedFraction;
+        const visibleLength = segmentLength * visibleFraction;
 
-        const lengthTraveledStart = lengthTraveled;
-        const lengthTraveledEnd = lengthTraveledStart + partialLength;
-        // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
-        // console.log("From", normalisedStart, "to", normalisedEnd);
+        if (visibleLength <= 0) {
+          lengthTraveled = 0;
+        } else {
 
-        // console.log("partialPercentage", partialPercentage);
-        const partial0 = Vector2.lerp(partialQuad.p0, partialQuad.p1, partialPercentage);
-        const partial3 = Vector2.lerp(partialQuad.p3, partialQuad.p2, partialPercentage);
-        
-        const gradient = this.createGradient(partial0, partialQuad.p1, lengthTraveledStart / this.maxRibbonLength, lengthTraveledEnd / this.maxRibbonLength);
-        this.context.fillStyle = gradient; //partialQuad.oddEven ? "blue" : "#000099";
+          const lengthTraveledStart = lengthTraveled;
+          const lengthTraveledEnd = lengthTraveledStart + visibleLength;
+          // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
+          // console.log("From", normalisedStart, "to", normalisedEnd);
 
-        this.context.beginPath();
-        this.context.moveTo(partial0.x, partial0.y);
-        this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
-        this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
-        this.context.lineTo(partial3.x, partial3.y);
+          // console.log("partialPercentage", partialPercentage);
+          const partial0 = Vector2.lerp(partialQuad.p0, partialQuad.p1, trimmedFraction);
+          const partial3 = Vector2.lerp(partialQuad.p3, partialQuad.p2, trimmedFraction);
+          
+          const gradient = this.createGradient(partial0, partialQuad.p1, normalizeLength(lengthTraveledStart), normalizeLength(lengthTraveledEnd));
+          this.context.fillStyle = gradient; //partialQuad.oddEven ? "blue" : "#000099";
 
-        
-        this.context.closePath();
-        this.context.fill();
-        this.context.stroke();
+          this.context.beginPath();
+          this.context.moveTo(partial0.x, partial0.y);
+          this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
+          this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
+          this.context.lineTo(partial3.x, partial3.y);
 
-        lengthTraveled += partialLength;
+          
+          this.context.closePath();
+          this.context.fill();
+          this.context.stroke();
+
+          lengthTraveled += visibleLength;
+        }
       }
     }
 
@@ -344,7 +364,7 @@ class RibbonMain {
       const lengthTraveledEnd = lengthTraveledStart + quad.length;
       // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
 
-      const gradient = this.createGradient(quad.p0, quad.p1, lengthTraveledStart / this.maxRibbonLength, lengthTraveledEnd / this.maxRibbonLength);
+      const gradient = this.createGradient(quad.p0, quad.p1, normalizeLength(lengthTraveledStart), normalizeLength(lengthTraveledEnd));
       this.context.fillStyle = gradient; //quad.oddEven ? "blue" : "#000099";
       this.context.beginPath();
       this.context.moveTo(quad.p0.x, quad.p0.y);
