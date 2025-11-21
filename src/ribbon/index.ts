@@ -1,6 +1,7 @@
 import { VerletMass, Vector2 } from "../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
 import { getQuads } from "./quads";
+import { lerpRGB } from "../shared/utils";
 
 // const colors = [
 //   ["#df0049", "#660671"], // red
@@ -41,7 +42,7 @@ class RibbonMain {
   private movementAngleThreshold: number = 90; // Angle threshold in degrees for movement vs segment direction
   // private readonly maxPoints: number = 10;
   private ribbonLength: number = 0;
-  private traveledLength: number = 0;
+
   private maxRibbonLength: number = 5000;
 
   constructor() {
@@ -142,6 +143,21 @@ class RibbonMain {
     }
   }
   
+
+  private createGradient(fromPosition: Vector2, toPosition: Vector2, from: number, to: number): CanvasGradient {
+    const gradient = this.context.createLinearGradient(fromPosition.x, fromPosition.y, toPosition.x, toPosition.y);
+    
+    const startColor = [255, 0, 0];
+    const startColorDark = [128, 0, 0];
+    const endColor = [0, 0, 255];
+    const endColorDark = [0, 0, 128];
+    const color = lerpRGB(startColor, endColor, to);
+    const colorDark = lerpRGB(startColorDark, endColorDark, from);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, colorDark);
+    return gradient;
+
+  }
   /**
    * 
    * When ribbon length is above theshold this function will remove points until below the threshold, and then add teh last removed point back in
@@ -245,7 +261,7 @@ class RibbonMain {
       // Clamp to [-1, 1] to avoid NaN from acos
       const clampedDot = Math.max(-1, Math.min(1, dotProduct));
       const angle = Math.acos(clampedDot);
-      const angleDeg = angle * 180 / Math.PI;
+      // const angleDeg = angle * 180 / Math.PI;
       
       // Convert threshold from degrees to radians
       const movementThresholdRad = this.movementAngleThreshold * Math.PI / 180;
@@ -265,34 +281,6 @@ class RibbonMain {
       return false;
     }
 
-    // If 2+ points exist, check angle between segments
-    // Previous segment: last point to second-to-last point
-    // const secondToLastPoint = this.points[this.points.length - 2];
-    // const previousSegment = Vector2.sub(latestPoint.mass.position, secondToLastPoint.mass.position);
-    
-    // Only check angle if both segments have meaningful length
-    /*
-    if (currentSegment.length() > 0.1 && previousSegment.length() > 0.1) {
-      const currentNormalized = currentSegment.normalized();
-      const previousNormalized = previousSegment.normalized();
-      
-      // Calculate dot product to get angle
-      const dotProduct = currentNormalized.x * previousNormalized.x + currentNormalized.y * previousNormalized.y;
-      // Clamp to [-1, 1] to avoid NaN from acos
-      const clampedDot = Math.max(-1, Math.min(1, dotProduct));
-      const angle = Math.acos(clampedDot);
-      const angleDeg = angle * 180 / Math.PI;
-      
-      // Convert threshold from degrees to radians
-      const thresholdRad = this.angleThreshold * Math.PI / 180;
-      
-      if (angle > thresholdRad) {
-        console.log(`SPAWN: Segment-to-segment angle threshold exceeded (${angleDeg.toFixed(2)}° > ${this.angleThreshold}°)`);
-        return true;
-      }
-    }
-    */
-
     return false;
   }
 
@@ -304,21 +292,35 @@ class RibbonMain {
   }
 
   render(): void {
+
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
+    // let gradData = []
+
+    let lengthTraveled = 0;
+
     const quads = getQuads(this.allPoints, this.thickness);
     if(this.ribbonLength > this.maxRibbonLength) {
 
       const partialQuad = quads.shift();
+
       if(partialQuad) {
         const segmentLength = partialQuad.length;
         const excessLength = this.ribbonLength - this.maxRibbonLength;
         const partialPercentage = excessLength / segmentLength;
+        const partialLength = segmentLength * partialPercentage;
+
+        const lengthTraveledStart = lengthTraveled;
+        const lengthTraveledEnd = lengthTraveledStart + partialLength;
+        // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
+        // console.log("From", normalisedStart, "to", normalisedEnd);
+
         // console.log("partialPercentage", partialPercentage);
         const partial0 = Vector2.lerp(partialQuad.p0, partialQuad.p1, partialPercentage);
         const partial3 = Vector2.lerp(partialQuad.p3, partialQuad.p2, partialPercentage);
-        // this.context.fillStyle = "cyan"
-        this.context.fillStyle = partialQuad.oddEven ? "blue" : "#000099";
+        
+        const gradient = this.createGradient(partial0, partialQuad.p1, lengthTraveledStart / this.maxRibbonLength, lengthTraveledEnd / this.maxRibbonLength);
+        this.context.fillStyle = gradient; //partialQuad.oddEven ? "blue" : "#000099";
 
         this.context.beginPath();
         this.context.moveTo(partial0.x, partial0.y);
@@ -330,12 +332,20 @@ class RibbonMain {
         this.context.closePath();
         this.context.fill();
         this.context.stroke();
+
+        lengthTraveled += partialLength;
       }
     }
 
-    this.context.strokeStyle = "#ff00ff";
+    // this.context.strokeStyle = "#ff00ff";
     for (const quad of quads) {
-      this.context.fillStyle = quad.oddEven ? "blue" : "#000099";
+
+      const lengthTraveledStart = lengthTraveled;
+      const lengthTraveledEnd = lengthTraveledStart + quad.length;
+      // gradData.push({start: lengthTraveledStart, end: lengthTraveledEnd, normalStart: lengthTraveledStart / this.maxRibbonLength, normalEnd: lengthTraveledEnd / this.maxRibbonLength});
+
+      const gradient = this.createGradient(quad.p0, quad.p1, lengthTraveledStart / this.maxRibbonLength, lengthTraveledEnd / this.maxRibbonLength);
+      this.context.fillStyle = gradient; //quad.oddEven ? "blue" : "#000099";
       this.context.beginPath();
       this.context.moveTo(quad.p0.x, quad.p0.y);
       this.context.lineTo(quad.p1.x, quad.p1.y);
@@ -343,10 +353,15 @@ class RibbonMain {
       this.context.lineTo(quad.p3.x, quad.p3.y);
       this.context.closePath();
       this.context.fill();
-      this.context.stroke();
+      // this.context.stroke();
+
+      lengthTraveled += quad.length;
     }
 
+    // console.log("gradData", gradData, this.maxRibbonLength);
+
     // DEBUG
+    /*
     this.context.strokeStyle = "red";
     // draw pointer point as cross
     const size = 20;
@@ -368,19 +383,8 @@ class RibbonMain {
       this.context.lineTo(this.allPoints[i].position.x, this.allPoints[i].position.y);
     } // end at mouse position
     this.context.stroke();
-    /*
-    if (this.points.length > 0) {
-      this.context.beginPath();
-      this.context.moveTo(this.points[0].mass.position.x, this.points[0].mass.position.y);
-      
-      for (let i = 1; i < this.points.length; i++) {
-        this.context.lineTo(this.points[i].mass.position.x, this.points[i].mass.position.y);
-      }
-      this.context.lineTo(this.pointerPosition.x, this.pointerPosition.y); // end at mouse position
-      this.context.stroke();
-    }
-
-      */
+    */
+   
   }
 }
 
