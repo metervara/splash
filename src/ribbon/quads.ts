@@ -56,7 +56,8 @@ export const getQuads = (points: {position: Vector2, oddEven: boolean}[], thickn
     let q1 = Vector2.add(pStart, Vector2.mul(perpendicular, halfThickness));
     let q4 = Vector2.sub(pStart, Vector2.mul(perpendicular, halfThickness));
     
-    if(pBeyondStart) {
+    const prevSegmentLength = pBeyondStart ? Vector2.distance(pStart, pBeyondStart) : 0;
+    if(pBeyondStart && prevSegmentLength >= MIN_SEGMENT_LENGTH) {
       // 1. Check angle betwene prev and current segments.
       const segPrevDirection = Vector2.sub(pStart, pBeyondStart);
       segPrevDirection.normalize();
@@ -113,7 +114,8 @@ export const getQuads = (points: {position: Vector2, oddEven: boolean}[], thickn
     let q2 = Vector2.add(pEnd, Vector2.mul(perpendicular, halfThickness));
     let q3 = Vector2.sub(pEnd, Vector2.mul(perpendicular, halfThickness));
 
-    if(pBeyondEnd) {
+    const nextSegmentLength = pBeyondEnd ? Vector2.distance(pBeyondEnd, pEnd) : 0;
+    if(pBeyondEnd && nextSegmentLength >= MIN_SEGMENT_LENGTH) {
       // 1. Check angle betwene prev and current segments.
       const segNextDirection = Vector2.sub(pBeyondEnd, pEnd);
       segNextDirection.normalize();
