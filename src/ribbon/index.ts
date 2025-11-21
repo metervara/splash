@@ -310,12 +310,24 @@ class RibbonMain {
       // console.log("Draw last segment partially");
       const partialQuad = quads.shift();
       if(partialQuad) {
+        const segmentLength = partialQuad.length;
+        const excessLength = this.ribbonLength - this.maxRibbonLength;
+        const partialPercentage = excessLength / segmentLength;
+        // console.log("partialPercentage", partialPercentage);
+        const partial0 = Vector2.lerp(partialQuad.p0, partialQuad.p1, partialPercentage);
+        const partial3 = Vector2.lerp(partialQuad.p3, partialQuad.p2, partialPercentage);
         this.context.fillStyle = "cyan"
         this.context.beginPath();
-        this.context.moveTo(partialQuad.p0.x, partialQuad.p0.y);
+        this.context.moveTo(partial0.x, partial0.y);
         this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
         this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
-        this.context.lineTo(partialQuad.p3.x, partialQuad.p3.y);
+        this.context.lineTo(partial3.x, partial3.y);
+
+        // this.context.moveTo(partialQuad.p0.x, partialQuad.p0.y);
+        // this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
+        // this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
+        // this.context.lineTo(partialQuad.p3.x, partialQuad.p3.y);
+        
         this.context.closePath();
         this.context.fill();
         this.context.stroke();

@@ -72,4 +72,8 @@ export class Vector2 {
 	static dot(vec0: Vector2, vec1: Vector2): number {
 		return vec0.x * vec1.x + vec0.y * vec1.y;
 	}
+
+	static lerp(vec0: Vector2, vec1: Vector2, t: number): Vector2 {
+		return new Vector2(vec0.x + (vec1.x - vec0.x) * t, vec0.y + (vec1.y - vec0.y) * t);
+	}
 }
