@@ -31,6 +31,7 @@ class RibbonMain {
   private previousPointerDelta: Vector2 = new Vector2(0, 0);
   private lastPointerMoveTime: number = 0;
   private points: { mass: VerletMass, created: Date, oddEven: boolean }[] = [];
+  private allPoints: { position: Vector2, oddEven: boolean }[] = [];
 
   // Spawning configuration
   private maxDistanceToSpawn: number = Number.MAX_SAFE_INTEGER; // Spawn if distance exceeds this
@@ -38,8 +39,9 @@ class RibbonMain {
   private thickness: number = 50;
   // private angleThreshold: number = 90; // Angle threshold in degrees for segment-to-segment comparison
   private movementAngleThreshold: number = 90; // Angle threshold in degrees for movement vs segment direction
-  private readonly maxPoints: number = 10;
+  // private readonly maxPoints: number = 10;
   private ribbonLength: number = 0;
+  private maxRibbonLength: number = 5000;
 
   constructor() {
     const container = document.createElement("div");
@@ -73,9 +75,19 @@ class RibbonMain {
       mass.setVelocity(-initialVelocity.x, -initialVelocity.y, this.fixedDelta);
     }
     // First point starts with zero velocity (stays at pointer position)
-    
     this.points.push({ mass, created: new Date(), oddEven });
+    this.updateAllPointsAndRecalculateLength();
+
     oddEven = !oddEven;
+  }
+
+  updateAllPointsAndRecalculateLength(): void {
+    this.allPoints = [...this.points.map(p => {return {position: p.mass.position, oddEven: p.oddEven}}), {position: this.pointerPosition, oddEven: false}];
+    this.ribbonLength = this.allPoints.reduce((total, currentPoint, index) => {
+      if (index === 0) return total;
+      const previousPoint = this.allPoints[index - 1];
+      return total + Vector2.distance(previousPoint.position, currentPoint.position);
+    }, 0);
   }
 
   resize(): void {
@@ -87,10 +99,12 @@ class RibbonMain {
     const screenWidth = this.canvas.width;
     this.maxDistanceToSpawn = screenWidth * 0.35;
     this.minDistanceToSpawn = screenWidth * 0.2;
-
+    this.maxRibbonLength = screenWidth * 5;
     this.thickness = screenWidth * 0.1;
-    // console.log("maxDistanceToSpawn", this.maxDistanceToSpawn);
-    // console.log("minDistanceToSpawn", this.minDistanceToSpawn);
+
+    console.log("maxDistanceToSpawn", this.maxDistanceToSpawn);
+    console.log("minDistanceToSpawn", this.minDistanceToSpawn);
+    console.log("maxRibbonLength", this.maxRibbonLength);
   }
 
   updateFollowPoint(x: number, y: number): void {
@@ -127,11 +141,33 @@ class RibbonMain {
     }
   }
   
-  private killPoints(): void {
-    for (const point of this.points) {
-      if (point.created.getTime() + POINT_LIFETIME_MS < Date.now()) {
-        this.points.splice(this.points.indexOf(point), 1);
+  /**
+   * 
+   * When ribbon length is above theshold this function will remove points until below the threshold, and then add teh last removed point back in
+   * We need one point beyond the threshold, so we can draw the last segment partially 
+   */
+  private trimPoints(): void {
+    // Delete based on total ribbon length
+    if(this.allPoints.length < 2 || this.ribbonLength <= this.maxRibbonLength) {
+      return;
+    }
+
+
+    let removedPoint: { mass: VerletMass, created: Date, oddEven: boolean } | undefined = undefined;
+
+    while(this.ribbonLength > this.maxRibbonLength && this.points.length > 0) {
+      removedPoint = this.points.shift();
+      if(!removedPoint) {
+        break;
       }
+
+      this.updateAllPointsAndRecalculateLength();
+    }
+
+
+    if(removedPoint) {
+      this.points.unshift(removedPoint);
+      this.updateAllPointsAndRecalculateLength();
     }
   }
 
@@ -164,11 +200,12 @@ class RibbonMain {
       this.spawnPoint();
     }
 
-    this.killPoints();
+    this.trimPoints();
 
-    if(this.points.length > this.maxPoints) {
-      this.points.shift();
-    }
+    // No deletion on time, we use a length of the entire ribbon to remove points
+    // if(this.points.length > this.maxPoints) {
+    //   this.points.shift();
+    // }
 
     this.render();
   };
@@ -229,8 +266,8 @@ class RibbonMain {
 
     // If 2+ points exist, check angle between segments
     // Previous segment: last point to second-to-last point
-    const secondToLastPoint = this.points[this.points.length - 2];
-    const previousSegment = Vector2.sub(latestPoint.mass.position, secondToLastPoint.mass.position);
+    // const secondToLastPoint = this.points[this.points.length - 2];
+    // const previousSegment = Vector2.sub(latestPoint.mass.position, secondToLastPoint.mass.position);
     
     // Only check angle if both segments have meaningful length
     /*
@@ -268,15 +305,22 @@ class RibbonMain {
   render(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    
-    const allPoints = [...this.points.map(p => {return {position: p.mass.position, oddEven: p.oddEven}}), {position: this.pointerPosition, oddEven: false}];
-    this.ribbonLength = allPoints.reduce((total, currentPoint, index) => {
-      if (index === 0) return total;
-      const previousPoint = allPoints[index - 1];
-      return total + Vector2.distance(previousPoint.position, currentPoint.position);
-    }, 0);
-    
-    const quads = getQuads(allPoints, this.thickness);
+    const quads = getQuads(this.allPoints, this.thickness);
+    if(this.ribbonLength > this.maxRibbonLength) {
+      // console.log("Draw last segment partially");
+      const partialQuad = quads.shift();
+      if(partialQuad) {
+        this.context.fillStyle = "cyan"
+        this.context.beginPath();
+        this.context.moveTo(partialQuad.p0.x, partialQuad.p0.y);
+        this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
+        this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
+        this.context.lineTo(partialQuad.p3.x, partialQuad.p3.y);
+        this.context.closePath();
+        this.context.fill();
+        this.context.stroke();
+      }
+    }
 
     this.context.strokeStyle = "#ff00ff";
     for (const quad of quads) {
@@ -304,11 +348,13 @@ class RibbonMain {
     this.context.stroke();
 
     // draw ribbon line (for debugging purposes)
-    this.context.beginPath();
-    this.context.moveTo(allPoints[0].position.x, allPoints[0].position.y);
+    if(this.allPoints.length > 0) {
+      this.context.beginPath();
+      this.context.moveTo(this.allPoints[0].position.x, this.allPoints[0].position.y);
+    }
     
-    for (let i = 1; i < allPoints.length; i++) {
-      this.context.lineTo(allPoints[i].position.x, allPoints[i].position.y);
+    for (let i = 1; i < this.allPoints.length; i++) {
+      this.context.lineTo(this.allPoints[i].position.x, this.allPoints[i].position.y);
     } // end at mouse position
     this.context.stroke();
     /*
