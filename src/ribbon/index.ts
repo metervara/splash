@@ -86,9 +86,10 @@ class RibbonMain {
     const screenWidth = this.canvas.width;
     this.maxDistanceToSpawn = screenWidth * 0.35;
     this.minDistanceToSpawn = screenWidth * 0.2;
+
     this.thickness = screenWidth * 0.1;
-    console.log("maxDistanceToSpawn", this.maxDistanceToSpawn);
-    console.log("minDistanceToSpawn", this.minDistanceToSpawn);
+    // console.log("maxDistanceToSpawn", this.maxDistanceToSpawn);
+    // console.log("minDistanceToSpawn", this.minDistanceToSpawn);
   }
 
   updateFollowPoint(x: number, y: number): void {
@@ -175,7 +176,7 @@ class RibbonMain {
     // If no points exist, spawn the first point (only if pointer has moved)
     if (this.points.length === 0) {
       if (this.pointerDelta.length() > 0.1) {
-        console.log("SPAWN: First point (pointer moved)");
+        // console.log("SPAWN: First point (pointer moved)");
         return true;
       }
       return false;
@@ -211,7 +212,7 @@ class RibbonMain {
       const movementThresholdRad = this.movementAngleThreshold * Math.PI / 180;
       
       if (angle > movementThresholdRad) {
-        console.log(`SPAWN: Movement angle threshold exceeded (${angleDeg.toFixed(2)}° > ${this.movementAngleThreshold}°)`);
+        // console.log(`SPAWN: Movement angle threshold exceeded (${angleDeg.toFixed(2)}° > ${this.movementAngleThreshold}°)`);
         return true;
       }
     }
@@ -219,7 +220,7 @@ class RibbonMain {
     // If only 1 point exists, spawn when distance exceeds maximum threshold
     if (this.points.length === 1) {
       if (distanceToLatest > this.maxDistanceToSpawn) {
-        console.log(`SPAWN: Distance exceeds max (${distanceToLatest.toFixed(2)} > ${this.maxDistanceToSpawn.toFixed(2)}) - single point`);
+        // console.log(`SPAWN: Distance exceeds max (${distanceToLatest.toFixed(2)} > ${this.maxDistanceToSpawn.toFixed(2)}) - single point`);
         return true;
       }
       return false;

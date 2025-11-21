@@ -1,11 +1,14 @@
 import { Vector2 } from "../shared/physics2d/Vector2";
 
+const MIN_SEGMENT_LENGTH = 1e-3;
+
 export interface SegmentQuad {
   p0: Vector2;
   p1: Vector2;
   p2: Vector2;
   p3: Vector2;
   oddEven: boolean;
+  length: number;
 }
 
 const angleBewteenSegments = (v1: Vector2, v2: Vector2): number => {
@@ -41,6 +44,10 @@ export const getQuads = (points: {position: Vector2, oddEven: boolean}[], thickn
     const pBeyondEnd = i < points.length - 2 ? points[i + 2].position : null;
 
     const direction = Vector2.sub(pEnd, pStart);
+    const segmentLength = direction.length();
+    if (segmentLength < MIN_SEGMENT_LENGTH) {
+      continue;
+    }
     direction.normalize();
     const perpendicular = new Vector2(-direction.y, direction.x);
     const halfThickness = thickness / 2;
@@ -158,7 +165,7 @@ export const getQuads = (points: {position: Vector2, oddEven: boolean}[], thickn
 
     }
 
-    quads.push({ p0: q1, p1: q2, p2: q3, p3: q4, oddEven: points[i].oddEven });
+    quads.push({ p0: q1, p1: q2, p2: q3, p3: q4, oddEven: points[i].oddEven, length: segmentLength });
   }
   
   return quads;
