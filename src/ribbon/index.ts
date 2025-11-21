@@ -41,6 +41,7 @@ class RibbonMain {
   private movementAngleThreshold: number = 90; // Angle threshold in degrees for movement vs segment direction
   // private readonly maxPoints: number = 10;
   private ribbonLength: number = 0;
+  private traveledLength: number = 0;
   private maxRibbonLength: number = 5000;
 
   constructor() {
@@ -307,7 +308,7 @@ class RibbonMain {
     
     const quads = getQuads(this.allPoints, this.thickness);
     if(this.ribbonLength > this.maxRibbonLength) {
-      // console.log("Draw last segment partially");
+
       const partialQuad = quads.shift();
       if(partialQuad) {
         const segmentLength = partialQuad.length;
@@ -316,17 +317,15 @@ class RibbonMain {
         // console.log("partialPercentage", partialPercentage);
         const partial0 = Vector2.lerp(partialQuad.p0, partialQuad.p1, partialPercentage);
         const partial3 = Vector2.lerp(partialQuad.p3, partialQuad.p2, partialPercentage);
-        this.context.fillStyle = "cyan"
+        // this.context.fillStyle = "cyan"
+        this.context.fillStyle = partialQuad.oddEven ? "blue" : "#000099";
+
         this.context.beginPath();
         this.context.moveTo(partial0.x, partial0.y);
         this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
         this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
         this.context.lineTo(partial3.x, partial3.y);
 
-        // this.context.moveTo(partialQuad.p0.x, partialQuad.p0.y);
-        // this.context.lineTo(partialQuad.p1.x, partialQuad.p1.y);
-        // this.context.lineTo(partialQuad.p2.x, partialQuad.p2.y);
-        // this.context.lineTo(partialQuad.p3.x, partialQuad.p3.y);
         
         this.context.closePath();
         this.context.fill();
