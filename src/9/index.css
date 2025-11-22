@@ -1,6 +1,6 @@
 :root {
   
-  --bg-color: #76CAFC; /* #CCDBF4; */
+  --bg-color: #111111; /* #CCDBF4; */
   --text-color: var(--bg-color); /* #02beab; */
 
   --circle-size: 200vw; /* max(300vh, 300vw); */
@@ -11,9 +11,9 @@
 
   --border-color: var(--text-color);
 
-  --hour-color: #F94C5F;
-  --minute-color: #FCA03B;
-  --second-color: #2D37D7;
+  --hour-color: #ff0000;
+  --minute-color: #00ff00;
+  --second-color: #0000ff;
 
   /* --hour-color-light: #FD6353;
   --minute-color-light: #FCBC4E;

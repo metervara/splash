@@ -56,7 +56,7 @@ const onDomReady = () => {
     title: item.title, /* || getDisplayName(item.href), */
     description: item.description,
     tags: item.tags,
-    thumbnails: [`${item.href}/thumbnail.webp`],
+    thumbnails: item.thumbnails,
     href: item.href,
     group: item.group
   } as GridItem)));

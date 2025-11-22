@@ -48,8 +48,8 @@ class RibbonMain {
   constructor() {
     const container = document.createElement("div");
     container.id = "metervara_ribbon";
-    container.style.cssText =
-      "position: fixed; left: 0em; top: 0em; z-index: 1; width: 100%; height: 100%; pointer-events: none;";
+    // container.style.cssText =
+    //   "position: fixed; left: 0em; top: 0em; z-index: 1; width: 100%; height: 100%; pointer-events: none;";
     document.body.insertBefore(container, document.body.firstChild);
 
     this.canvas = document.createElement("canvas");

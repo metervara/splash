@@ -2,7 +2,35 @@ import { defineConfig } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
-function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath: string; urlPath: string; title: string; description: string }[] {
+type SplashPage = {
+    id: string;
+    name: string;
+    absPath: string;
+    urlPath: string;
+    title: string;
+    description: string;
+    thumbnail?: {
+        absPath: string;
+        fileName: string;
+        publicPath: string;
+    };
+};
+
+function findThumbnailForDir(dirAbsPath: string, dirName: string): SplashPage['thumbnail'] | undefined {
+    if (!fs.existsSync(dirAbsPath)) return undefined;
+    const files = fs.readdirSync(dirAbsPath, { withFileTypes: true });
+    const thumbEntry = files
+        .filter((entry) => entry.isFile())
+        .find((entry) => entry.name.toLowerCase().startsWith('thumbnail.'));
+    if (!thumbEntry) return undefined;
+    const absPath = path.resolve(dirAbsPath, thumbEntry.name);
+    const ext = path.extname(thumbEntry.name) || '';
+    const fileName = `${dirName}${ext}`;
+    const publicPath = `/thumbnails/${fileName}`;
+    return { absPath, fileName, publicPath };
+}
+
+function scanSplashHtmlFilesInSrc(projectRoot: string): SplashPage[] {
     const srcDir = path.resolve(projectRoot, 'src');
     if (!fs.existsSync(srcDir)) return [];
     const dirEntries = fs.readdirSync(srcDir, { withFileTypes: true })
@@ -11,7 +39,8 @@ function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath:
         .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
     return dirEntries
         .map((dir) => {
-            const indexPath = path.resolve(srcDir, dir, 'index.html');
+            const dirAbsPath = path.resolve(srcDir, dir);
+            const indexPath = path.resolve(dirAbsPath, 'index.html');
             if (!fs.existsSync(indexPath)) return null;
             const html = fs.readFileSync(indexPath, 'utf8');
             const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
@@ -31,18 +60,46 @@ function scanSplashHtmlFilesInSrc(projectRoot: string): { name: string; absPath:
                     description = contentMatch[1].trim();
                 }
             }
-            return { name: `splash_${dir}`, absPath: indexPath, urlPath: `/${dir}/`, title, description };
+            const thumbnail = findThumbnailForDir(dirAbsPath, dir) ?? undefined;
+            return {
+                id: dir,
+                name: `splash_${dir}`,
+                absPath: indexPath,
+                urlPath: `/${dir}/`,
+                title,
+                description,
+                thumbnail,
+            };
         })
-        .filter((p): p is { name: string; absPath: string; urlPath: string; title: string; description: string } => p !== null);
+        .filter((p): p is SplashPage => p !== null);
 }
 
-function writeSplashManifest(projectRoot: string, pages: { urlPath: string; title: string; description: string }[]): void {
+function writeSplashManifest(projectRoot: string, pages: SplashPage[]): void {
 	const publicDir = path.resolve(projectRoot, 'public');
 	if (!fs.existsSync(publicDir)) {
 		fs.mkdirSync(publicDir, { recursive: true });
 	}
 	const manifestPath = path.resolve(publicDir, 'splash-manifest.json');
-    const payload = pages.map((p) => ({ href: p.urlPath, title: p.title, description: p.description }));
+    const thumbnailsDir = path.join(publicDir, 'thumbnails');
+    if (fs.existsSync(thumbnailsDir)) {
+        fs.rmSync(thumbnailsDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(thumbnailsDir, { recursive: true });
+    for (const page of pages) {
+        if (page.thumbnail) {
+            const destPath = path.join(thumbnailsDir, page.thumbnail.fileName);
+            fs.copyFileSync(page.thumbnail.absPath, destPath);
+        }
+    }
+    const payload = pages.map((p) => {
+        const entry: { href: string; title: string; description: string; thumbnails?: string[] } = {
+            href: p.urlPath,
+            title: p.title,
+            description: p.description,
+        };
+        if (p.thumbnail) entry.thumbnails = [p.thumbnail.publicPath];
+        return entry;
+    });
 	fs.writeFileSync(manifestPath, JSON.stringify(payload, null, 2) + '\n');
 }
 

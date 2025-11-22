@@ -3,7 +3,8 @@ import { initSplashOverlay } from "/src/shared/utils";
 const h1 = document.querySelector("h1") as HTMLElement;
 const hourCircle = document.querySelector(".circle.hour") as HTMLElement;
 const minuteCircle = document.querySelector(".circle.minute") as HTMLElement;
-const secondCircle = document.querySelector(".circle.second") as HTMLElement
+const secondCircle = document.querySelector(".circle.second") as HTMLElement;
+const rootStyle = document.documentElement.style;
 
 type TimeData = {
   hours: number;
@@ -102,6 +103,17 @@ const getTime = (): TimeData => {
   };
 };
 
+const updateBackgroundColor = (currTime: TimeData) => {
+  const normalizeToChannel = (value: number) =>
+    Math.round(Math.min(Math.max(value, 0), 1) * 255);
+
+  const red = normalizeToChannel(currTime.hoursFraction);
+  const green = normalizeToChannel(currTime.minutesFraction);
+  const blue = normalizeToChannel(currTime.secondsFraction);
+
+  rootStyle.setProperty("--bg-color", `rgb(${red} ${green} ${blue})`);
+};
+
 const animate = () => {
   requestAnimationFrame(animate);
   const currTime = getTime();
@@ -125,6 +137,7 @@ const animate = () => {
   const delimiter = "•";
   h1.innerHTML = `<span class="hour">${String(currTime.hours).padStart(2, '0')}</span>${delimiter}<span class="minute">${String(currTime.minutes).padStart(2, '0')}</span>${delimiter}<span class="second">${String(currTime.seconds).padStart(2, '0')}</span>`;
   
+  updateBackgroundColor(currTime);
   time = currTime;
 }
 
