@@ -43,48 +43,61 @@ export class Star {
   get position(): Vector2 {
     return Vector2.lerp(this.far, this.near, this.time);
   }
+
+  public getOffsetPosition(offset: Vector2): Vector2 {
+    return Vector2.lerp(Vector2.add(this.far, offset), Vector2.sub(this.near, offset), this.time);
+  }
 };
 
 export class Starfield {
   private stars: Star[] = [];
   private bounds: StarfieldBounds;
-  
-  // private offCenter: Vector2 = new Vector2(0, 0);
+  private offCenter: Vector2 = new Vector2(0, 0);
   // private bounds: Rect;
 
   constructor(count: number, bounds: StarfieldBounds) {
     this.stars = [];
     this.bounds = bounds;
     for (let i = 0; i < count; i++) {
-      this.stars.push(this.spawnStar());
+      this.stars.push(this.spawnStar(true));
     }
   }
 
   public update(dt: number) {
     for (let i = this.stars.length - 1; i >= 0; i--) {
       const star = this.stars[i];
-      star.time += dt * 0.2 / star.length;
+      // star.time += dt * 0.1 / star.length; // Breaks the perspective effect
+      star.time += dt * 0.0001;
       if (star.time > 1.0) {
-        this.stars[i] = this.spawnStar(true); // keep length constant without splice/push
+        this.stars[i] = this.spawnStar(); // keep length constant without splice/push
       }
     }
   }
 
-  // public setOffCenter(offCenter: Vector2) {
-  //   this.offCenter = offCenter;
-  // }
+  public setOffCenter(offCenter: Vector2) {
+    this.offCenter = offCenter;
+  }
 
   public updateBounds(bounds: StarfieldBounds) {
     this.bounds = bounds;
   }
 
-  public getStars(): Star[] {
-    return this.stars;
+  public getStars(): { position: Vector2; direction: Vector2; length: number; time: number }[] {
+    const result = this.stars.map((star) => {
+      return {
+        position: star.getOffsetPosition(this.offCenter),
+        direction: star.direction,
+        length: star.length,
+        time: star.time,
+      }
+    })
+    return result;
   }
+  
   
   private spawnStar(prewarm: boolean = false): Star {
     const direction = Math.random() * 2 * Math.PI;
-    const rFar = this.bounds.width * 0.1;
+    const rFar = this.bounds.width * 0.02;
     const rNearInner = this.bounds.width * 0.2;
     const rNearOuter = Math.sqrt(this.bounds.width * this.bounds.width + this.bounds.height * this.bounds.height);
     

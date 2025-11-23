@@ -10,18 +10,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
   let lastTime = 0;
+  let center: Vector2 = new Vector2(0, 0);
 
   if (!ctx) return;
 
   const trail = new Trail(100);
 
-  const starfield = new Starfield(100, { x: 0, y: 0, width: canvas.width, height: canvas.height });
+  let starfield: Starfield; // = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height });
 
   const resizeHandler = () => {
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.floor(rect.width);
     canvas.height = Math.floor(rect.height);
+    center = new Vector2(rect.width * 0.5, rect.height * 0.5);
     trail.setMaxLength(rect.width * 0.5);
+    if (!starfield) {
+      starfield = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height });
+    }
     starfield.updateBounds({ x: 0, y: 0, width: canvas.width, height: canvas.height });
   };
 
@@ -40,13 +45,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     lastTime = time;
 
     // DEBUG starfield
-    const starSize = 20
+    const starSize = 6
     starfield.getStars().forEach((star) => {
+      const position = Vector2.add(star.position, center);
       ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(star.position.x, star.position.y);
-      ctx.lineTo(star.position.x + star.direction.x * starSize, star.position.y + star.direction.y * starSize);
+      ctx.moveTo(position.x, position.y);
+      ctx.lineTo(position.x + star.direction.x * starSize, position.y + star.direction.y * starSize);
       ctx.stroke();
       // ctx.fillStyle = "white";
       // ctx.fillRect(star.position.x - starSize * 0.5, star.position.y - starSize * 0.5, starSize, starSize);
