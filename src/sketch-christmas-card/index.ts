@@ -26,8 +26,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     trail.addPoint(point);
   };
   
-  
-  
   const tick = () => {
     requestAnimationFrame(tick);
     
@@ -47,6 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       ctx.stroke();
     }
+
+    const followPoints = trail.getEvenlySpacedPoints(10, 50);
+    followPoints.forEach((point) => {
+      ctx.fillStyle = "red";
+      ctx.fillRect(point.x - 5, point.y - 5, 10, 10);
+    });
   }
   
   window.addEventListener("resize", resizeHandler);
