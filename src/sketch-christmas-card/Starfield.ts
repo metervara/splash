@@ -1,5 +1,9 @@
 import { Vector2 } from "../shared/physics2d";
-import { lerp } from "../shared/utils";
+import { lerp, map } from "../shared/utils";
+
+// TODO: Move to classes and make adjustable
+const nearRadiusFactor = 0.2;
+const farRadiusFactor = 0.02;
 
 export type StarfieldBounds = {
   x: number;
@@ -7,22 +11,22 @@ export type StarfieldBounds = {
   width: number;
   height: number;
 };
-
-
 export class Star {
   private far: Vector2;
   private near: Vector2;
   private _direction: Vector2;
   private _time: number;
   private _length: number;
+  private _proximity: number;
 
-  constructor(far: Vector2, near: Vector2, length: number, time: number) {
+  constructor(far: Vector2, near: Vector2, length: number, proximity: number, time: number) {
     this.far = far;
     this.near = near;
     this._length = length;
     this._time = time;
     this._direction = Vector2.sub(near, far);
     this.direction.normalize();
+    this._proximity = proximity;
   }
 
   set time(time: number) {
@@ -38,6 +42,10 @@ export class Star {
 
   get direction(): Vector2 {
     return this._direction;
+  }
+
+  get proximity(): number {
+    return this._proximity;
   }
   // Pass offCenter here?
   get position(): Vector2 {
@@ -82,13 +90,14 @@ export class Starfield {
     this.bounds = bounds;
   }
 
-  public getStars(): { position: Vector2; direction: Vector2; length: number; time: number }[] {
+  public getStars(): { position: Vector2; direction: Vector2; length: number; time: number; proximity: number }[] {
     const result = this.stars.map((star) => {
       return {
         position: star.getOffsetPosition(this.offCenter),
         direction: star.direction,
         length: star.length,
         time: star.time,
+        proximity: star.proximity,
       }
     })
     return result;
@@ -97,8 +106,8 @@ export class Starfield {
   
   private spawnStar(prewarm: boolean = false): Star {
     const direction = Math.random() * 2 * Math.PI;
-    const rFar = this.bounds.width * 0.02;
-    const rNearInner = this.bounds.width * 0.2;
+    const rFar = this.bounds.width * farRadiusFactor * Math.random();
+    const rNearInner = this.bounds.width * nearRadiusFactor;
     const rNearOuter = Math.sqrt(this.bounds.width * this.bounds.width + this.bounds.height * this.bounds.height);
     
     const rNear = lerp(rNearInner, rNearOuter, Math.random()); //Math.sqrt(this.bounds.width * this.bounds.width + this.bounds.height * this.bounds.height);
@@ -106,6 +115,12 @@ export class Starfield {
     const far = new Vector2(rFar * Math.cos(direction), rFar * Math.sin(direction));
     const near = new Vector2(rNear * Math.cos(direction), rNear * Math.sin(direction));
     const length = Vector2.distance(far, near);
-    return new Star(far, near, length, prewarm ? Math.random() : 0);
+
+    
+    const minLength =  this.bounds.width * nearRadiusFactor - this.bounds.width * farRadiusFactor;
+    const maxLength = Math.sqrt(this.bounds.width * this.bounds.width + this.bounds.height * this.bounds.height);
+    const proximity = map(length, minLength, maxLength, 0, 1);
+
+    return new Star(far, near, length, proximity, prewarm ? Math.random() : 0);
   }
 }

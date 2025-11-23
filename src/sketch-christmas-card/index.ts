@@ -2,7 +2,7 @@ import { Trail } from "./Trail";
 import { Starfield } from "./Starfield";
 import { Vector2 } from "../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
-
+import { map } from "../shared/utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
@@ -45,11 +45,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     lastTime = time;
 
     // DEBUG starfield
-    const starSize = 6
+    const starSizeMin = 2;
+    const starSizeMax = 10;
     starfield.getStars().forEach((star) => {
+      const starSize = map(star.proximity, 0, 1, starSizeMin, starSizeMax);
       const position = Vector2.add(star.position, center);
       ctx.strokeStyle = "white";
-      ctx.lineWidth = 3;
+      ctx.lineWidth = starSize * 0.5;
       ctx.beginPath();
       ctx.moveTo(position.x, position.y);
       ctx.lineTo(position.x + star.direction.x * starSize, position.y + star.direction.y * starSize);
