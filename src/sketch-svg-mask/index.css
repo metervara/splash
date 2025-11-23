@@ -31,17 +31,26 @@ svg.fullscreen {
 }
 
 svg.fullscreen text {
-    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    color: var(--text-color);
-    font-weight: 700;
-    font-style: normal;
-    font-size: 14vw;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  font-weight: 700;
+  font-style: normal;
+  font-size: 14vw;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
     
-    fill: red;
-  }
+  fill: red;
+}
 
+/* Apply transforms to #text-group instead of the text directly */
+/* The mask stays fixed while the text inside the group can move */
+/* Example: svg.fullscreen g#text-group { transform: translate(10px, 0); } */
+
+svg.fullscreen text#mask-text {
+  /* position: absolute; */
+  fill: white;
+  color: transparent;
+}
 /*
 h1 {
   position: relative;

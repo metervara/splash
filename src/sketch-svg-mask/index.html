@@ -18,14 +18,29 @@
       xmlns="http://www.w3.org/2000/svg"
       id="svg-container"
       class="fullscreen">
-      <text
-        id="svg-text"
-        x="50%"
-        y="50%"
-        dy=".35em"
-        text-anchor="middle">
-        METERVARA
-      </text>
+      <defs>
+        <mask id="text-mask" maskUnits="userSpaceOnUse">
+          <text
+            id="mask-text"
+            x="50%"
+            y="50%"
+            dy=".35em"
+            text-anchor="middle"
+            fill="white">
+            METERVARA
+          </text>
+        </mask>
+      </defs>
+      <g id="text-group" mask="url(#text-mask)">
+        <text
+          id="svg-text"
+          x="50%"
+          y="50%"
+          dy=".35em"
+          text-anchor="middle">
+          METERVARA
+        </text>
+      </g>
     </svg>
   </body>
   </html>
