@@ -224,6 +224,10 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
 }
 
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
 export function lerpRGB(a: number[], b: number[], t: number): string {
   const r = a[0] + (b[0] - a[0]) * t;
   const g = a[1] + (b[1] - a[1]) * t;
