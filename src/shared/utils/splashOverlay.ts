@@ -1,42 +1,4 @@
-export function selectRandom<T>(items: readonly T[]): T | undefined {
-	if (!Array.isArray(items) || items.length === 0) return undefined;
-	const index = Math.floor(Math.random() * items.length);
-	return items[index];
-}
-
-
-// Visited links helpers
-const VISITED_STORAGE_KEY = 'visited-links';
-
-function readVisitedSet(): Set<string> {
-	try {
-		const raw = localStorage.getItem(VISITED_STORAGE_KEY);
-		if (!raw) return new Set();
-		const arr = JSON.parse(raw) as string[];
-		return new Set(Array.isArray(arr) ? arr : []);
-	} catch {
-		return new Set();
-	}
-}
-
-function writeVisitedSet(set: Set<string>): void {
-	try {
-		localStorage.setItem(VISITED_STORAGE_KEY, JSON.stringify([...set]));
-	} catch {}
-}
-
-export function isVisited(href: string): boolean {
-	if (typeof href !== 'string' || href.length === 0) return false;
-	const set = readVisitedSet();
-	return set.has(href);
-}
-
-export function markVisited(href: string): void {
-	if (typeof href !== 'string' || href.length === 0) return;
-	const set = readVisitedSet();
-	set.add(href);
-	writeVisitedSet(set);
-}
+import { markVisited } from './visitedLinks';
 
 type ManifestEntry = string | { href: string; title?: string };
 
@@ -62,7 +24,7 @@ export async function initSplashOverlay(): Promise<void> {
 	const container = document.createElement('div');
 	container.id = 'splash-overlay';
 	container.className = 'overlay';
-	
+
 	const firstRow = document.createElement('div');
 	firstRow.className = 'splash-overlay-row';
 
@@ -100,17 +62,20 @@ export async function initSplashOverlay(): Promise<void> {
 		const candidates = normalizeCandidates(path);
 		for (const c of candidates) {
 			const found = manifest.indexOf(c);
-			if (found >= 0) { idx = found; break; }
+			if (found >= 0) {
+				idx = found;
+				break;
+			}
 		}
 
 		const safeIdx = idx >= 0 ? idx : 0;
 		const displayIndex = total > 0 ? safeIdx + 1 : 1;
 		const totalDisplay = total > 0 ? total : 1;
-		
+
 		// Get the current entry's title
 		const currentEntry = manifestRaw[safeIdx];
 		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
-		
+
 		// Create first line: counter and title in same box
 		const infoDiv = document.createElement('div');
 		infoDiv.textContent = `#${displayIndex} / ${totalDisplay}${title ? ` : ${title}` : ''}`;
@@ -189,48 +154,3 @@ export async function initSplashOverlay(): Promise<void> {
 	document.addEventListener('keydown', handleKeyDown);
 }
 
-
-/**
- * Remaps a number from one range to another.
- *
- * @param value - The input number to map.
- * @param inMin - Lower bound of the input range.
- * @param inMax - Upper bound of the input range.
- * @param outMin - Lower bound of the output range.
- * @param outMax - Upper bound of the output range.
- * @returns The mapped number.
- *
- * Example:
- *   map(-5, -10, 0, 0, 100) // → 50
- *   map(5, 0, 10, 100, 200) // → 150
- *   map(10, 0, 10, 100, 0)  // → 0 (inverted output range)
- */
-export function map(
-  value: number,
-  inMin: number,
-  inMax: number,
-  outMin: number,
-  outMax: number
-): number {
-  if (inMin === inMax) {
-    throw new Error("Input range cannot have the same min and max values.");
-  }
-
-  const proportion = (value - inMin) / (inMax - inMin);
-  return outMin + proportion * (outMax - outMin);
-}
-
-export function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(value, max));
-}
-
-export function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-export function lerpRGB(a: number[], b: number[], t: number): string {
-  const r = a[0] + (b[0] - a[0]) * t;
-  const g = a[1] + (b[1] - a[1]) * t;
-  const b2 = a[2] + (b[2] - a[2]) * t;
-  return `rgb(${r|0}, ${g|0}, ${b2|0})`;
-}
