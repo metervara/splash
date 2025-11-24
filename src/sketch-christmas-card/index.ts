@@ -5,8 +5,28 @@ import { initSplashOverlay } from "/src/shared/utils/";
 import { map, lerp } from "/src/shared/utils";
 import { easeOutQuad } from "/src/shared/utils/ease";
 
+type StarRenderData = ReturnType<Starfield["getStars"]>[number];
+
+const SNOWFLAKE_SOURCES = [
+  new URL("./images/snowflake-0.png", import.meta.url).href,
+  new URL("./images/snowflake-1.png", import.meta.url).href,
+  new URL("./images/snowflake-2.png", import.meta.url).href,
+  new URL("./images/snowflake-3.png", import.meta.url).href,
+  new URL("./images/snowflake-4.png", import.meta.url).href,
+];
+
+const loadImage = (src: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    image.src = src;
+  });
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
+  const snowflakeImages = await Promise.all(SNOWFLAKE_SOURCES.map(loadImage));
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
@@ -21,7 +41,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const SMOOTHING_OFFSET = 0.05;
   let offset: Vector2 = new Vector2(0, 0);
 
+  const starSizeMin = 3;
+  const starSizeMax = 20;
+  const starFadeWindow = 0.15;
+
   if (!ctx) return;
+
+  const disableImageSmoothing = () => {
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = "low";
+  };
+  disableImageSmoothing();
 
   const trail = new Trail(100);
 
@@ -31,6 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.floor(rect.width);
     canvas.height = Math.floor(rect.height);
+    disableImageSmoothing();
     center = new Vector2(rect.width * 0.5, rect.height * 0.5);
     trail.setMaxLength(rect.width * 0.5);
     if (!starfield) {
@@ -47,6 +78,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     mousePosition = new Vector2(e.clientX - rect.left, e.clientY - rect.top);
     const point = new Vector2(e.clientX - rect.left, e.clientY - rect.top);
     trail.addPoint(point);
+  };
+
+  const drawStar = (star: StarRenderData, index: number) => {
+    let starSize = map(star.proximity, 0, 1, starSizeMin, starSizeMax);
+    starSize = lerp(starSizeMin, starSize, easeOutQuad(star.time));
+
+    starSize *= 3;
+    const position = Vector2.add(star.position, center);
+
+    const fadeIn = Math.min(star.time / starFadeWindow, 1);
+    const fadeOut = Math.min((1 - star.time) / starFadeWindow, 1);
+    const opacity = Math.max(0, Math.min(fadeIn, fadeOut));
+    if (opacity <= 0) {
+      return;
+    }
+
+    if (!snowflakeImages.length) {
+      return;
+    }
+
+    const image = snowflakeImages[index % snowflakeImages.length];
+    const halfSize = starSize * 0.5;
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(image, position.x - halfSize, position.y - halfSize, starSize, starSize);
+    ctx.restore();
   };
   
   const tick = (time: number) => {
@@ -86,15 +144,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     starfield.update(dt);
     lastTime = time;
 
-    // DEBUG starfield
-    const starSizeMin = 3;
-    const starSizeMax = 20;
-
-    const starFadeWindow = 0.15;
-
     // starfield.setOffCenter(new Vector2(200, 0));
 
-    starfield.getStars().forEach((star) => {
+    starfield.getStars().forEach((star, index) => {
+      drawStar(star, index);
+      /*
       let starSize = map(star.proximity, 0, 1, starSizeMin, starSizeMax);
       starSize = lerp(starSizeMin, starSize, easeOutQuad(star.time));
       const position = Vector2.add(star.position, center);
@@ -115,8 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ctx.lineTo(position.x + star.direction.x * starSize, position.y + star.direction.y * starSize);
       ctx.stroke();
       ctx.restore();
-      // ctx.fillStyle = "white";
-      // ctx.fillRect(star.position.x - starSize * 0.5, star.position.y - starSize * 0.5, starSize, starSize);
+      */
     });
 
     // DEBUG trail
