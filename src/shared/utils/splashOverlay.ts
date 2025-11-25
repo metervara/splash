@@ -1,6 +1,12 @@
 import { markVisited } from './visitedLinks';
 
-type ManifestEntry = string | { href: string; title?: string };
+type ManifestEntry =
+	| string
+	| {
+			href: string;
+			title?: string;
+			description?: string;
+	  };
 
 function toHref(entry: ManifestEntry): string | null {
 	if (typeof entry === 'string') return entry;
@@ -42,8 +48,11 @@ export async function initSplashOverlay(): Promise<void> {
 
 	const listLink = document.createElement('a');
 	listLink.textContent = 'list';
+	listLink.className = 'overlay-single-line';
 	listLink.href = '/';
 	listLink.setAttribute('aria-label', 'List');
+
+	let descriptionRow: HTMLDivElement | null = null;
 
 	try {
 		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
@@ -75,10 +84,17 @@ export async function initSplashOverlay(): Promise<void> {
 		// Get the current entry's title
 		const currentEntry = manifestRaw[safeIdx];
 		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
+		const metaDescription =
+			document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
+		const description =
+			typeof currentEntry === 'object' && currentEntry.description
+				? currentEntry.description
+				: metaDescription;
 
 		// Create first line: counter and title in same box
 		const infoDiv = document.createElement('div');
 		infoDiv.textContent = `#${displayIndex} / ${totalDisplay}${title ? ` : ${title}` : ''}`;
+		infoDiv.className = 'overlay-single-line';
 		firstRow.appendChild(infoDiv);
 
 		// Mark current splash as visited using canonical manifest href
@@ -89,6 +105,7 @@ export async function initSplashOverlay(): Promise<void> {
 		// Random: navigate directly to a random splash (excluding current)
 		randomLink.href = '#';
 		randomLink.setAttribute('aria-label', 'Random splash');
+		randomLink.className = 'overlay-single-line';
 		randomLink.addEventListener('click', (e) => {
 			e.preventDefault();
 			if (!Array.isArray(manifest) || manifest.length === 0) return;
@@ -105,8 +122,50 @@ export async function initSplashOverlay(): Promise<void> {
 		const nextIdx = total > 0 ? (safeIdx + 1) % total : 0;
 		prevLink.href = total > 0 ? manifest[prevIdx] : '/';
 		prevLink.setAttribute('aria-label', 'Previous splash');
+		prevLink.className = 'overlay-single-line';
 		nextLink.href = total > 0 ? manifest[nextIdx] : '/';
 		nextLink.setAttribute('aria-label', 'Next splash');
+		nextLink.className = 'overlay-single-line';
+		if (description?.trim()) {
+			const trimmedDescription = description.trim();
+			const infoButton = document.createElement('button');
+			infoButton.type = 'button';
+			infoButton.textContent = 'info';
+			infoButton.setAttribute('aria-label', 'Toggle description');
+			infoButton.setAttribute('aria-expanded', 'false');
+			infoButton.setAttribute('aria-pressed', 'false');
+			infoButton.setAttribute('aria-haspopup', 'true');
+			infoButton.className = 'overlay-single-line';
+			firstRow.appendChild(infoButton);
+
+			descriptionRow = document.createElement('div');
+			descriptionRow.className = 'splash-overlay-row splash-description-row';
+			descriptionRow.hidden = true;
+
+			const descriptionBox = document.createElement('div');
+			descriptionBox.className = 'splash-description';
+			descriptionBox.setAttribute('aria-live', 'polite');
+
+			const descriptionText = document.createElement('span');
+			descriptionText.className = 'splash-description-text';
+			descriptionText.textContent = trimmedDescription;
+			descriptionBox.appendChild(descriptionText);
+			descriptionRow.appendChild(descriptionBox);
+
+			let isVisible = false;
+			const setVisibility = (visible: boolean) => {
+				isVisible = visible;
+				if (descriptionRow) {
+					descriptionRow.hidden = !visible;
+				}
+				infoButton.setAttribute('aria-expanded', String(visible));
+				infoButton.setAttribute('aria-pressed', String(visible));
+			};
+
+			infoButton.addEventListener('click', () => {
+				setVisibility(!isVisible);
+			});
+		}
 	} catch {
 		const errorCounterDiv = document.createElement('div');
 		errorCounterDiv.textContent = '#? / ?';
@@ -125,6 +184,9 @@ export async function initSplashOverlay(): Promise<void> {
 	// Add rows to container
 	container.appendChild(firstRow);
 	container.appendChild(buttonsRow);
+	if (descriptionRow) {
+		container.appendChild(descriptionRow);
+	}
 
 	document.body.appendChild(container);
 
