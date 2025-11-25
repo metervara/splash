@@ -28,3 +28,4 @@ export function lerpRGB(a: number[], b: number[], t: number): string {
 	return `rgb(${r | 0}, ${g | 0}, ${b2 | 0})`;
 }
 
+

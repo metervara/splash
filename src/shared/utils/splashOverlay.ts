@@ -154,3 +154,4 @@ export async function initSplashOverlay(): Promise<void> {
 	document.addEventListener('keydown', handleKeyDown);
 }
 
+
