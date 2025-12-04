@@ -19,7 +19,13 @@ const REINDEER_SOURCES = Array.from({ length: 29 }, (_, i) =>
   new URL(`./images/reindeer-${i + 1}.png`, import.meta.url).href
 );
 
+const SLEIGH_SOURCES = Array.from({ length: 29 }, (_, i) =>
+  new URL(`./images/sleigh-${i + 1}.png`, import.meta.url).href
+);
+
 const SLEIGH_SCALE = 7;
+const REINDEER_COUNT = 2;
+const SPACING = 0;
 
 
 const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -62,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   disableImageSmoothing();
 
   // TODO: Calculate dynamically based on the items we display in the trail
-  const trail = new Trail(200); // Depends on number of images (reindeer + sleigh, and spaces multiplied by SLEIGH_SCALE)
+  const trail = new Trail(300); // Depends on number of images (reindeer + sleigh, and spaces multiplied by SLEIGH_SCALE)
 
   let starfield: Starfield; // = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height });
 
