@@ -24,7 +24,8 @@ const SLEIGH_SOURCES = Array.from({ length: 29 }, (_, i) =>
 );
 
 const SLEIGH_SCALE = 7;
-const REINDEER_COUNT = 2;
+const MAX_OFFSET = 0.8;
+const REINDEER_COUNT = 3;
 const SPACING = 0;
 
 
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
   const snowflakeImages = await Promise.all(SNOWFLAKE_SOURCES.map(loadImage));
   const reindeerImages = await Promise.all(REINDEER_SOURCES.map(loadImage));
+  const sleighImages = (await Promise.all(SLEIGH_SOURCES.map(loadImage))).reverse();
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
@@ -68,7 +70,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   disableImageSmoothing();
 
   // TODO: Calculate dynamically based on the items we display in the trail
-  const trail = new Trail(300); // Depends on number of images (reindeer + sleigh, and spaces multiplied by SLEIGH_SCALE)
+  let trailLength = (REINDEER_COUNT * reindeerImages.length + sleighImages.length + SPACING* REINDEER_COUNT) * MAX_OFFSET * SLEIGH_SCALE;
+  trailLength += 5 * SLEIGH_SCALE; // Just some padding so it's guaranteed to be bigger than the trail
+  console.log(trailLength);
+  const trail = new Trail(trailLength);
+  // const trail = new Trail(1000);
 
   let starfield: Starfield; // = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height });
 
@@ -78,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     canvas.height = Math.floor(rect.height);
     disableImageSmoothing();
     center = new Vector2(rect.width * 0.5, rect.height * 0.5);
-    trail.setMaxLength(rect.width * 0.5);
+    // trail.setMaxLength(rect.width * 0.5);
     if (!starfield) {
       starfield = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height}, 0);
     }
@@ -161,9 +167,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // starfield.setOffCenter(new Vector2(200, 0));
 
-    starfield.getStars().forEach((star, index) => {
-      drawStar(star, index);
-    });
+    // starfield.getStars().forEach((star, index) => {
+    //   drawStar(star, index);
+    // });
 
     // DEBUG trail
     ctx.strokeStyle = "red";
@@ -190,14 +196,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     // });
 
     // SANTAS SLEIGH AND REINDEER FOLLOWING
-    const itemCount = 29; // TEMP. THis si a single reindeer for now
-    const followPoints = trail.getEvenlySpacedPoints(itemCount, SLEIGH_SCALE * 0.8).reverse();
+    const framesPerItem = 29;
+    const itemCount = (REINDEER_COUNT * framesPerItem) + (REINDEER_COUNT * SPACING) + framesPerItem;
+    const followPoints = trail.getEvenlySpacedPoints(itemCount, SLEIGH_SCALE * MAX_OFFSET).reverse();
+    
     followPoints.forEach((point, index) => {
       const indexReversed = itemCount - index - 1;
-      const image = reindeerImages[indexReversed];
-      const width = image.width * SLEIGH_SCALE;
-      const height = image.height * SLEIGH_SCALE;
-      ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5, width, height);
+      let image: HTMLImageElement | null = null;
+      
+      // Determine which type of image to render based on position
+      let position = indexReversed;
+      
+      // Process reindeer sections first (from back to front)
+      for (let i = REINDEER_COUNT - 1; i >= 0; i--) {
+        // Check if in this reindeer's frames
+        if (position < framesPerItem) {
+          image = reindeerImages[position];
+          break;
+        }
+        position -= framesPerItem;
+        
+        // Check if in spacing after this reindeer
+        if (position < SPACING) {
+          image = null; // Skip rendering for spacing
+          break;
+        }
+        position -= SPACING;
+      }
+      
+      // Check if we're in the sleigh section (at the front) - only if we haven't found an image yet
+      if (image === null && position >= 0 && position < framesPerItem) {
+        image = sleighImages[position];
+      }
+      
+      if (image) {
+        const width = image.width * SLEIGH_SCALE;
+        const height = image.height * SLEIGH_SCALE;
+        ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5, width, height);
+      }
     });
   }
   
