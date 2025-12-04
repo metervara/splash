@@ -56,6 +56,7 @@
 .overlay.unsupported * {
   color: var(--unsupported-text);
   background-color: var(--unsupported-bg);
+  padding: 8px 10px;
 }
 
 /* Hover individually for links inside the overlay strip */

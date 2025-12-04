@@ -15,6 +15,13 @@ const SNOWFLAKE_SOURCES = [
   new URL("./images/snowflake-4.png", import.meta.url).href,
 ];
 
+const REINDEER_SOURCES = Array.from({ length: 29 }, (_, i) =>
+  new URL(`./images/reindeer-${i + 1}.png`, import.meta.url).href
+);
+
+const SLEIGH_SCALE = 7;
+
+
 const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -27,6 +34,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
 document.addEventListener("DOMContentLoaded", async () => {
   await initSplashOverlay();
   const snowflakeImages = await Promise.all(SNOWFLAKE_SOURCES.map(loadImage));
+  const reindeerImages = await Promise.all(REINDEER_SOURCES.map(loadImage));
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
@@ -53,7 +61,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   disableImageSmoothing();
 
-  const trail = new Trail(100);
+  // TODO: Calculate dynamically based on the items we display in the trail
+  const trail = new Trail(200); // Depends on number of images (reindeer + sleigh, and spaces multiplied by SLEIGH_SCALE)
 
   let starfield: Starfield; // = new Starfield(200, { x: 0, y: 0, width: canvas.width, height: canvas.height });
 
@@ -148,28 +157,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     starfield.getStars().forEach((star, index) => {
       drawStar(star, index);
-      /*
-      let starSize = map(star.proximity, 0, 1, starSizeMin, starSizeMax);
-      starSize = lerp(starSizeMin, starSize, easeOutQuad(star.time));
-      const position = Vector2.add(star.position, center);
-
-      const fadeIn = Math.min(star.time / starFadeWindow, 1);
-      const fadeOut = Math.min((1 - star.time) / starFadeWindow, 1);
-      const opacity = Math.max(0, Math.min(fadeIn, fadeOut));
-      if (opacity <= 0) {
-        return;
-      }
-
-      ctx.save();
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = starSize * 0.5;
-      ctx.globalAlpha = opacity;
-      ctx.beginPath();
-      ctx.moveTo(position.x, position.y);
-      ctx.lineTo(position.x + star.direction.x * starSize, position.y + star.direction.y * starSize);
-      ctx.stroke();
-      ctx.restore();
-      */
     });
 
     // DEBUG trail
@@ -187,11 +174,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       ctx.stroke();
     }
 
-    // SANTAS SLEIGH
-    const followPoints = trail.getEvenlySpacedPoints(10, 50);
-    followPoints.forEach((point) => {
-      ctx.fillStyle = "red";
-      ctx.fillRect(point.x - 5, point.y - 5, 10, 10);
+    // DEBUG TRAIL FOLLOWING
+    // const followPointsDev = trail.getEvenlySpacedPoints(10, 20).reverse();
+    // let size = 20;
+    // followPointsDev.forEach((point) => {
+    //   ctx.fillStyle = "red";
+    //   ctx.fillRect(point.x - size* 0.5, point.y - size * 0.5, size, size);
+    //   size -= 1;
+    // });
+
+    // SANTAS SLEIGH AND REINDEER FOLLOWING
+    const itemCount = 29; // TEMP. THis si a single reindeer for now
+    const followPoints = trail.getEvenlySpacedPoints(itemCount, SLEIGH_SCALE * 0.8).reverse();
+    followPoints.forEach((point, index) => {
+      const indexReversed = itemCount - index - 1;
+      const image = reindeerImages[indexReversed];
+      const width = image.width * SLEIGH_SCALE;
+      const height = image.height * SLEIGH_SCALE;
+      ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5, width, height);
     });
   }
   
