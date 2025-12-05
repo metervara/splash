@@ -32,4 +32,7 @@ pnpm-debug.log*
 # Generated at dev/build by plugin
 public/splash-manifest.json
 
+# Local todo list
+TODO.md
+
 

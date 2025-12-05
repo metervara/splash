@@ -25,9 +25,14 @@ const SLEIGH_SOURCES = Array.from({ length: 29 }, (_, i) =>
 
 const SLEIGH_SCALE = 7;
 const MAX_OFFSET = 0.8;
-const REINDEER_COUNT = 3;
-const SPACING = 0;
+const REINDEER_COUNT = 5;
+const SPACING = 5;
 
+const REINS_SOURCE = new URL(`./images/reins.png`, import.meta.url).href;
+const REINS_START_INDEX = 10;
+const REINS_END_INDEX = (REINDEER_COUNT + SPACING) * REINDEER_SOURCES.length + 5;
+
+console.log(`Reins from index: ${REINS_START_INDEX} to ${REINS_END_INDEX}`);
 
 const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
@@ -172,6 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // });
 
     // DEBUG trail
+    /*
     ctx.strokeStyle = "red";
     ctx.lineWidth = 2;
     
@@ -185,6 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       ctx.stroke();
     }
+    */
 
     // DEBUG TRAIL FOLLOWING
     // const followPointsDev = trail.getEvenlySpacedPoints(10, 20).reverse();
@@ -198,14 +205,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     // SANTAS SLEIGH AND REINDEER FOLLOWING
     const framesPerItem = 29;
     const itemCount = (REINDEER_COUNT * framesPerItem) + (REINDEER_COUNT * SPACING) + framesPerItem;
+    console.log(`Item count: ${itemCount}`);
     const followPoints = trail.getEvenlySpacedPoints(itemCount, SLEIGH_SCALE * MAX_OFFSET).reverse();
     
+    const reinsImage = new Image();
+    reinsImage.src = REINS_SOURCE;
+    const reinsWidth = reinsImage.width * SLEIGH_SCALE;
+    const reinsHeight = reinsImage.height * SLEIGH_SCALE;
+
     followPoints.forEach((point, index) => {
       const indexReversed = itemCount - index - 1;
       let image: HTMLImageElement | null = null;
+      let isSpacing = false;
       
       // Determine which type of image to render based on position
       let position = indexReversed;
+
+      // Draw reins if we're in the range
+      if (position >= REINS_START_INDEX && position < REINS_END_INDEX) {
+        ctx.drawImage(reinsImage, point.x - reinsWidth * 0.5, point.y - reinsHeight * 0.5, reinsWidth, reinsHeight);
+      }
       
       // Process reindeer sections first (from back to front)
       for (let i = REINDEER_COUNT - 1; i >= 0; i--) {
@@ -218,21 +237,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Check if in spacing after this reindeer
         if (position < SPACING) {
-          image = null; // Skip rendering for spacing
+          isSpacing = true; // Mark as spacing
           break;
         }
         position -= SPACING;
       }
       
-      // Check if we're in the sleigh section (at the front) - only if we haven't found an image yet
-      if (image === null && position >= 0 && position < framesPerItem) {
+      let yOff = 0;
+      // Check if we're in the sleigh section (at the front) - only if not spacing and haven't found an image
+      if (!isSpacing && image === null && position >= 0 && position < framesPerItem) {
         image = sleighImages[position];
+        yOff = 2 * SLEIGH_SCALE;
       }
       
       if (image) {
         const width = image.width * SLEIGH_SCALE;
         const height = image.height * SLEIGH_SCALE;
-        ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5, width, height);
+        ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5 + yOff, width, height);
       }
     });
   }
