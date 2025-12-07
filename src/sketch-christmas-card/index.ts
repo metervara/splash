@@ -32,7 +32,10 @@ const REINS_SOURCE = new URL(`./images/reins.png`, import.meta.url).href;
 const REINS_START_INDEX = 10;
 const REINS_END_INDEX = (REINDEER_COUNT + SPACING) * REINDEER_SOURCES.length + 5;
 
+let itemCount = 0;
+const framesPerItem = 29; // OLD _ REMOVE
 console.log(`Reins from index: ${REINS_START_INDEX} to ${REINS_END_INDEX}`);
+
 
 const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
@@ -48,6 +51,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   const snowflakeImages = await Promise.all(SNOWFLAKE_SOURCES.map(loadImage));
   const reindeerImages = await Promise.all(REINDEER_SOURCES.map(loadImage));
   const sleighImages = (await Promise.all(SLEIGH_SOURCES.map(loadImage))).reverse();
+
+  itemCount = sleighImages.length + (reindeerImages.length + SPACING) * REINDEER_COUNT;
+  console.log(`Item count: ${itemCount}`);
+
+  // LOOKUP for reindeer and sleigh drawing. 
+  // 1. Reindeer frames + spacing
+  const itemDataLookup: { image: HTMLImageElement | null, isSpacing: boolean, yOff: number }[] = [];
+  for(let n = 0; n < REINDEER_COUNT; n++) {
+    for(let i = 0; i < reindeerImages.length; i++) {
+      itemDataLookup.push({
+        image: reindeerImages[i],
+        isSpacing: false,
+        yOff: 0,
+      });
+    }
+    for(let i = 0; i < SPACING; i++) {
+      itemDataLookup.push({
+        image: null,
+        isSpacing: true,
+        yOff: 0,
+      });
+    }
+  }
+  // 2. Sleigh
+  for(let i = 0; i < sleighImages.length; i++) {
+    itemDataLookup.push({
+      image: sleighImages[i],
+      isSpacing: false,
+      yOff: 2 * SLEIGH_SCALE,
+    });
+  }
+
+  itemDataLookup.reverse(); // Draw from back to front.
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
@@ -136,7 +172,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tick = (time: number) => {
     requestAnimationFrame(tick);
 
-
     let mouseDirection = new Vector2(0, 0);
     if (mousePosition && mousePrevPosition) {
       mouseDirection = Vector2.sub(mousePosition, mousePrevPosition);
@@ -146,12 +181,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const targetOffset = Vector2.mul(Vector2.sub(center, mousePosition), 0.25);
       offset = Vector2.lerp(offset, targetOffset, SMOOTHING_OFFSET);
       starfield.setOffCenter(offset);
-      // smoothMousePosition = smoothMousePosition
-      //   ? Vector2.lerp(smoothMousePosition, mousePosition, SMOOTHING_POSITION)
-      //   : mousePosition.clone();
-
-      //   const offset = Vector2.mul(Vector2.sub(smoothMousePosition, center), 0.25);
-      //   starfield.setOffCenter(offset);
     }
 
     smoothMouseDirection = smoothMouseDirection
@@ -172,6 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // starfield.setOffCenter(new Vector2(200, 0));
 
+    // DRAW SNOWFLAKES
     // starfield.getStars().forEach((star, index) => {
     //   drawStar(star, index);
     // });
@@ -203,57 +233,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     // });
 
     // SANTAS SLEIGH AND REINDEER FOLLOWING
-    const framesPerItem = 29;
-    const itemCount = (REINDEER_COUNT * framesPerItem) + (REINDEER_COUNT * SPACING) + framesPerItem;
-    console.log(`Item count: ${itemCount}`);
+    // Trail points in reverse order so we draw from back to front. 
     const followPoints = trail.getEvenlySpacedPoints(itemCount, SLEIGH_SCALE * MAX_OFFSET).reverse();
     
+    // console.log(`Follow points: ${followPoints.length}, Item data lookup: ${itemDataLookup.length}`);
+
     const reinsImage = new Image();
     reinsImage.src = REINS_SOURCE;
     const reinsWidth = reinsImage.width * SLEIGH_SCALE;
     const reinsHeight = reinsImage.height * SLEIGH_SCALE;
 
+    // NEW IMPLEMENTATION - DRAW ITEMS BASED ON INDEX
     followPoints.forEach((point, index) => {
-      const indexReversed = itemCount - index - 1;
-      let image: HTMLImageElement | null = null;
-      let isSpacing = false;
+      const reversedIndex = itemCount - index - 1; // For reins. _We need index from fronbt to back to know where to start and end
       
-      // Determine which type of image to render based on position
-      let position = indexReversed;
-
-      // Draw reins if we're in the range
-      if (position >= REINS_START_INDEX && position < REINS_END_INDEX) {
+      if(reversedIndex >= REINS_START_INDEX && reversedIndex < REINS_END_INDEX) {
         ctx.drawImage(reinsImage, point.x - reinsWidth * 0.5, point.y - reinsHeight * 0.5, reinsWidth, reinsHeight);
       }
-      
-      // Process reindeer sections first (from back to front)
-      for (let i = REINDEER_COUNT - 1; i >= 0; i--) {
-        // Check if in this reindeer's frames
-        if (position < framesPerItem) {
-          image = reindeerImages[position];
-          break;
-        }
-        position -= framesPerItem;
-        
-        // Check if in spacing after this reindeer
-        if (position < SPACING) {
-          isSpacing = true; // Mark as spacing
-          break;
-        }
-        position -= SPACING;
-      }
-      
-      let yOff = 0;
-      // Check if we're in the sleigh section (at the front) - only if not spacing and haven't found an image
-      if (!isSpacing && image === null && position >= 0 && position < framesPerItem) {
-        image = sleighImages[position];
-        yOff = 2 * SLEIGH_SCALE;
-      }
-      
-      if (image) {
-        const width = image.width * SLEIGH_SCALE;
-        const height = image.height * SLEIGH_SCALE;
-        ctx.drawImage(image, point.x - width * 0.5, point.y - height * 0.5 + yOff, width, height);
+
+      const itemData = itemDataLookup[index];
+      if(itemData.image) {
+        const width = itemData.image.width * SLEIGH_SCALE;
+        const height = itemData.image.height * SLEIGH_SCALE;
+        ctx.drawImage(itemData.image, point.x - width * 0.5, point.y - height * 0.5 + itemData.yOff, width, height);
       }
     });
   }
