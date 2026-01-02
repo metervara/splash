@@ -1,0 +1,40 @@
+:root {
+  --text-color:  #ff0000;
+  --bg-color: #111;
+  --hue-offset: 0deg;
+  --hue-step: 36deg;
+}
+
+html, body {
+  height: 100%; 
+}
+body {
+  margin: 0;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  text-align: center;
+
+  background-color: var(--bg-color);
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15vw;
+  text-transform: uppercase;
+  /* position: relative; */
+  user-select: none;
+}
+
+h1 span {
+  /* cursor: grab; */
+  cursor: default;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: center;
+  filter: hue-rotate(calc(var(--hue-offset) + var(--hue-step) * var(--index)));
+  user-select: none;
+}

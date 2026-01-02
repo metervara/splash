@@ -1,6 +1,6 @@
-import { Vector2 } from "../shared/physics2d";
-import { lerp, map } from "../shared/utils";
-import { easeInQuad } from "../shared/utils/ease";
+import { Vector2 } from "./physics2d";
+import { lerp, map } from "./utils";
+import { easeInQuad } from "./utils/ease";
 
 // TODO: Move to classes and make adjustable
 const nearRadiusFactor = 0.2;

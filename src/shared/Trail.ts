@@ -1,4 +1,4 @@
-import { Vector2 } from "../shared/physics2d";
+import { Vector2 } from "/src/shared/physics2d";
 
 export class Trail {
   private points: Vector2[] = [];
@@ -31,9 +31,16 @@ export class Trail {
 
   private truncateTrail() {
     while (this.totalLength > this.maxLength && this.segmentLengths.length) {
+      const nextRemoval = this.segmentLengths[0] ?? 0;
+
+      // Stop if removing the next segment would undershoot the ideal length.
+      if (this.totalLength - nextRemoval < this.maxLength) {
+        break;
+      }
+
       this.points.shift(); // remove first element
       const removedLength = this.segmentLengths.shift();
-      if(removedLength !== undefined) {
+      if (removedLength !== undefined) {
         this.totalLength -= removedLength;
       }
     }
@@ -60,15 +67,23 @@ export class Trail {
    * Returns `count` points along the trail, starting from the most recent point
    * and moving backwards with `distance` spacing. Stops at the first point and
    * repeats it if the requested distribution would go beyond the trail.
+   * 
+   * @param count - Number of points to return
+   * @param distance - Spacing between each point
+   * @param progress - Value from 0 to 1 controlling how far along the trail the head is.
+   *                   At 0, all points are at the first point. At 1, full trail (default).
    */
-  public getEvenlySpacedPoints(count: number, distance: number): Vector2[] {
+  public getEvenlySpacedPoints(count: number, distance: number, progress: number = 1): Vector2[] {
     if (count <= 0 || this.points.length === 0) {
       return [];
     }
 
-    const lastPoint = this.points[this.points.length - 1];
+    // Clamp progress to [0, 1]
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
+    const firstPoint = this.points[0];
     if (this.points.length === 1 || distance <= 0) {
-      return Array.from({ length: count }, () => lastPoint.clone());
+      return Array.from({ length: count }, () => firstPoint.clone());
     }
 
     const cumulative: number[] = new Array(this.points.length);
@@ -78,12 +93,17 @@ export class Trail {
     }
 
     const totalLength = cumulative[cumulative.length - 1];
+    
+    // The "head" position is at effectiveLength from the start
+    const effectiveLength = totalLength * clampedProgress;
+    
     const result: Vector2[] = [];
     let segmentIndex = this.points.length - 2;
 
     for (let i = 0; i < count; i++) {
       const targetDistanceFromEnd = distance * i;
-      const targetDistanceFromStart = Math.max(0, totalLength - targetDistanceFromEnd);
+      // Use effectiveLength instead of totalLength
+      const targetDistanceFromStart = Math.max(0, effectiveLength - targetDistanceFromEnd);
 
       while (segmentIndex > 0 && targetDistanceFromStart < cumulative[segmentIndex]) {
         segmentIndex--;
@@ -108,5 +128,31 @@ export class Trail {
     }
 
     return result;
+  }
+
+  public clear(): void {
+    this.setPoints([]);
+  }
+
+  public setPoints(points: Vector2[]): void {
+    this.points = [];
+    this.segmentLengths = [];
+    this.totalLength = 0;
+
+    if (points.length === 0) {
+      return;
+    }
+
+    this.points.push(points[0].clone());
+    for (let i = 1; i < points.length; i++) {
+      const point = points[i].clone();
+      const lastPoint = this.points[this.points.length - 1];
+      const length = Vector2.distance(lastPoint, point);
+      this.segmentLengths.push(length);
+      this.totalLength += length;
+      this.points.push(point);
+    }
+
+    this.truncateTrail();
   }
 }
