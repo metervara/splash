@@ -20,7 +20,7 @@
   animation-iteration-count: 1;
 
   animation-duration: 800ms;
-  animation-delay: 750ms;
+  animation-delay: 300ms;
 }
 
 @keyframes centerReveal {

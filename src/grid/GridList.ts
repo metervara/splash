@@ -28,7 +28,7 @@ export class GridList {
   private resizeDebounceTimer: number | null = null;
   private fadeOutTimer: number | null = null;
   private headerZIndexRaised = false;
-  private headerRaiseTimer: number | null = null;
+  // private headerRaiseTimer: number | null = null;
 
   private state!: GridState;
   private headerRowIndex = 0;
@@ -295,13 +295,13 @@ export class GridList {
       }
     });
 
-    const totalWait = Math.max(0, Math.round(maxFinishMs + 20));
-    if (this.headerRaiseTimer !== null) window.clearTimeout(this.headerRaiseTimer);
-    this.headerRaiseTimer = window.setTimeout(() => {
-      this.headerEl!.style.zIndex = '10';
-      this.headerZIndexRaised = true;
-      this.headerRaiseTimer = null;
-    }, totalWait);
+    // const totalWait = Math.max(0, Math.round(maxFinishMs + 20));
+    // if (this.headerRaiseTimer !== null) window.clearTimeout(this.headerRaiseTimer);
+    // this.headerRaiseTimer = window.setTimeout(() => {
+    //   this.headerEl!.style.zIndex = '10';
+    //   this.headerZIndexRaised = true;
+    //   this.headerRaiseTimer = null;
+    // }, totalWait);
   }
 
   // -------------------------

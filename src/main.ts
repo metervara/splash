@@ -23,11 +23,6 @@ const loadManifest = async (): Promise<ManifestEntry[]> => {
 	}
 };
 
-// const getDisplayName = (path: string): string => {
-// 	const base = path.replace(/^\/+/, '').replace(/\.html$/, '').replace(/\/$/, '');
-// 	return base;
-// };
-
 const onDomReady = () => {
   
   const gridEl = document.getElementById('grid') as HTMLElement;
