@@ -1,0 +1,39 @@
+:root {
+  --text-color: #ffffff;
+  --bg-color: #0000ff;
+  --shadow-color: #000080;
+}
+
+html, body {
+  height: 100%; 
+}
+body {
+  margin: 0;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: min(3.1vw, 2.4vh); 
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  white-space: pre;
+  
+  /*
+    text-shadow: 2px 2px 0 var(--shadow-color),
+  -2px -2px 0 var(--shadow-color),
+  2px -2px 0 var(--shadow-color),
+  -2px 2px 0 var(--shadow-color),
+  0px 2px 0 var(--shadow-color),
+  2px 0px 0 var(--shadow-color),
+  0px -2px 0 var(--shadow-color),
+  -2px 0px 0 var(--shadow-color);
+  */
+}

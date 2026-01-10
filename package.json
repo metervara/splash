@@ -17,5 +17,8 @@
     "@types/node": "^24.8.1",
     "typescript": "^5.9.3",
     "vite": "^7.1.10"
+  },
+  "dependencies": {
+    "figlet": "^1.9.4"
   }
 }
