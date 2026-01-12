@@ -1,6 +1,7 @@
 {
   "name": "metervara-splash",
   "version": "0.1.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,6 +20,8 @@
     "vite": "^7.1.10"
   },
   "dependencies": {
-    "figlet": "^1.9.4"
+    "figlet": "^1.9.4",
+    "space-colonization": "github:metervara/2d-space-colonization-experiments#feat/library",
+    "vec2": "^1.6.1"
   }
 }
