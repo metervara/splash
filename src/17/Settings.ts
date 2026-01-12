@@ -23,7 +23,7 @@ export default {
 
   VenationType: 'Open',          // venation can be "Open" or "Closed"
   SegmentLength: 5,              // length of each branch segment. Smaller numbers mean smoother lines, but more computation cost
-  AttractionDistance: 20,        // radius of influence (d_i) around each attractor that attracts nodes
+  AttractionDistance: 25,        // radius of influence (d_i) around each attractor that attracts nodes
   KillDistance: 5,               // distance (d_k) between attractors and nodes when branches are ended
   IsPaused: false,               // initial pause/unpause state
   EnableCanalization: true,     // turns on/off auxin flux canalization (line segment thickening)
