@@ -7,6 +7,11 @@
   --unsupported-text: #660000;
 }
 
+/* Prevent elastic/rubber-band scroll on mobile for non-scrolling sketches */
+html, body {
+  overscroll-behavior: none;
+}
+
 .overlay {
   z-index: 10;
   font-size: 12px;

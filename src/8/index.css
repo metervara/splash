@@ -40,7 +40,10 @@ h1 {
   position: fixed;
   z-index: 2;
   color: var(--headline-color);
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100svh; /* Use svh to prevent shift when browser chrome shows/hides */
   margin: 0;
   font-weight: 400;
   font-style: normal;
@@ -187,11 +190,9 @@ body > main.scroll-host {
   left: calc(-0.5 * var(--content-width));
 }
 
-/* @media screen and (max-width: 768px){
-  h1 {
-    font-size: 15vw;
-  }
+/* @media screen and (max-width: 768px) {
   main {
-    width: 90vw;
+    padding-top: 50vh;
+    padding-bottom: 50vh;
   }
 } */

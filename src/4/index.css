@@ -61,9 +61,16 @@ div.container {
   background-color: var(--bg-color);
   box-sizing: border-box;
   margin: 0;
-  min-height: calc(100vh - 8vw);
+  min-height: calc(100svh - 8vw);
  
   overflow: hidden;
+}
+
+/* On mobile, add top padding to avoid splash overlay covering content */
+@media (max-width: 768px) {
+  div.container {
+    padding-top: 80px;
+  }
 }
 
 .cursor {
