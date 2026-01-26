@@ -1,21 +1,9 @@
+import manifest from 'virtual:grid-manifest';
+import type { ManifestItem } from '@metervara/grid-listing/vite-plugin';
 import { markVisited } from './visitedLinks';
 
-type ManifestEntry =
-	| string
-	| {
-			href: string;
-			title?: string;
-			description?: string;
-	  };
-
-function toHref(entry: ManifestEntry): string | null {
-	if (typeof entry === 'string') return entry;
-	if (entry && typeof entry.href === 'string') return entry.href;
-	return null;
-}
-
-/** Initialize and inject the shared splash overlay using splash-manifest.json. */
-export async function initSplashOverlay(): Promise<void> {
+/** Initialize and inject the shared splash overlay using the grid manifest. */
+export function initSplashOverlay(): void {
 	// Remove any pre-existing overlay to ensure a single instance
 	const existing = document.getElementById('splash-overlay');
 	if (existing) existing.remove();
@@ -54,125 +42,113 @@ export async function initSplashOverlay(): Promise<void> {
 
 	let descriptionRow: HTMLDivElement | null = null;
 
-	try {
-		const res = await fetch('/splash-manifest.json', { cache: 'no-store' });
-		if (!res.ok) throw new Error(String(res.status));
-		const manifestRaw = (await res.json()) as ManifestEntry[];
-		const manifest = manifestRaw.map(toHref).filter((h): h is string => typeof h === 'string');
-		const total = Array.isArray(manifest) ? manifest.length : 0;
-		const path = window.location.pathname;
-		function normalizeCandidates(p: string): string[] {
-			const withoutIndex = p.replace(/index\.html$/i, '');
-			const ensureSlash = withoutIndex.endsWith('/') ? withoutIndex : withoutIndex + '/';
-			const noSlash = ensureSlash.replace(/\/$/, '');
-			return [p, withoutIndex, ensureSlash, noSlash];
+	const items: ManifestItem[] = manifest.items;
+	const total = items.length;
+	const path = window.location.pathname;
+
+	function normalizeCandidates(p: string): string[] {
+		const withoutIndex = p.replace(/index\.html$/i, '');
+		const ensureSlash = withoutIndex.endsWith('/') ? withoutIndex : withoutIndex + '/';
+		const noSlash = ensureSlash.replace(/\/$/, '');
+		return [p, withoutIndex, ensureSlash, noSlash];
+	}
+
+	let idx = -1;
+	const candidates = normalizeCandidates(path);
+	for (const c of candidates) {
+		const found = items.findIndex((item) => item.href === c);
+		if (found >= 0) {
+			idx = found;
+			break;
 		}
-		let idx = -1;
-		const candidates = normalizeCandidates(path);
-		for (const c of candidates) {
-			const found = manifest.indexOf(c);
-			if (found >= 0) {
-				idx = found;
-				break;
+	}
+
+	const safeIdx = idx >= 0 ? idx : 0;
+	const displayIndex = total > 0 ? safeIdx + 1 : 1;
+	const totalDisplay = total > 0 ? total : 1;
+
+	// Get the current entry's title and description
+	const currentItem = items[safeIdx];
+	const title = currentItem?.title ?? '';
+	const metaDescription =
+		document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
+	const description = currentItem?.description ?? metaDescription;
+
+	// Create first line: counter and title in same box
+	const infoDiv = document.createElement('div');
+	infoDiv.textContent = `#${displayIndex} / ${totalDisplay}${title ? ` : ${title}` : ''}`;
+	infoDiv.className = 'overlay-single-line';
+	firstRow.appendChild(infoDiv);
+
+	// Mark current splash as visited using canonical manifest href
+	if (total > 0 && currentItem?.href) {
+		markVisited(currentItem.href);
+	}
+
+	// Random: navigate directly to a random splash (excluding current)
+	randomLink.href = '#';
+	randomLink.setAttribute('aria-label', 'Random splash');
+	randomLink.className = 'overlay-single-line';
+	randomLink.addEventListener('click', (e) => {
+		e.preventDefault();
+		if (items.length === 0) return;
+		const pool = items.map((_, i) => i).filter((i) => i !== safeIdx);
+		const chosenIdx = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : safeIdx;
+		const target = items[chosenIdx];
+		if (target?.href) {
+			window.location.href = target.href;
+		}
+	});
+
+	// Prev/Next with wrap-around
+	const prevIdx = total > 0 ? (safeIdx - 1 + total) % total : 0;
+	const nextIdx = total > 0 ? (safeIdx + 1) % total : 0;
+	prevLink.href = total > 0 ? items[prevIdx].href : '/';
+	prevLink.setAttribute('aria-label', 'Previous splash');
+	prevLink.className = 'overlay-single-line';
+	nextLink.href = total > 0 ? items[nextIdx].href : '/';
+	nextLink.setAttribute('aria-label', 'Next splash');
+	nextLink.className = 'overlay-single-line';
+
+	if (description?.trim()) {
+		const trimmedDescription = description.trim();
+		const infoButton = document.createElement('button');
+		infoButton.type = 'button';
+		infoButton.textContent = 'info';
+		infoButton.setAttribute('aria-label', 'Toggle description');
+		infoButton.setAttribute('aria-expanded', 'false');
+		infoButton.setAttribute('aria-pressed', 'false');
+		infoButton.setAttribute('aria-haspopup', 'true');
+		infoButton.className = 'overlay-single-line';
+		firstRow.appendChild(infoButton);
+
+		descriptionRow = document.createElement('div');
+		descriptionRow.className = 'splash-overlay-row splash-description-row';
+		descriptionRow.hidden = true;
+
+		const descriptionBox = document.createElement('div');
+		descriptionBox.className = 'splash-description';
+		descriptionBox.setAttribute('aria-live', 'polite');
+
+		const descriptionText = document.createElement('span');
+		descriptionText.className = 'splash-description-text';
+		descriptionText.textContent = trimmedDescription;
+		descriptionBox.appendChild(descriptionText);
+		descriptionRow.appendChild(descriptionBox);
+
+		let isVisible = false;
+		const setVisibility = (visible: boolean) => {
+			isVisible = visible;
+			if (descriptionRow) {
+				descriptionRow.hidden = !visible;
 			}
-		}
+			infoButton.setAttribute('aria-expanded', String(visible));
+			infoButton.setAttribute('aria-pressed', String(visible));
+		};
 
-		const safeIdx = idx >= 0 ? idx : 0;
-		const displayIndex = total > 0 ? safeIdx + 1 : 1;
-		const totalDisplay = total > 0 ? total : 1;
-
-		// Get the current entry's title
-		const currentEntry = manifestRaw[safeIdx];
-		const title = typeof currentEntry === 'object' && currentEntry.title ? currentEntry.title : '';
-		const metaDescription =
-			document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
-		const description =
-			typeof currentEntry === 'object' && currentEntry.description
-				? currentEntry.description
-				: metaDescription;
-
-		// Create first line: counter and title in same box
-		const infoDiv = document.createElement('div');
-		infoDiv.textContent = `#${displayIndex} / ${totalDisplay}${title ? ` : ${title}` : ''}`;
-		infoDiv.className = 'overlay-single-line';
-		firstRow.appendChild(infoDiv);
-
-		// Mark current splash as visited using canonical manifest href
-		if (total > 0 && typeof manifest[safeIdx] === 'string') {
-			markVisited(manifest[safeIdx]);
-		}
-
-		// Random: navigate directly to a random splash (excluding current)
-		randomLink.href = '#';
-		randomLink.setAttribute('aria-label', 'Random splash');
-		randomLink.className = 'overlay-single-line';
-		randomLink.addEventListener('click', (e) => {
-			e.preventDefault();
-			if (!Array.isArray(manifest) || manifest.length === 0) return;
-			const pool = manifest.map((_, i) => i).filter((i) => i !== safeIdx);
-			const chosenIdx = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : safeIdx;
-			const target = manifest[chosenIdx];
-			if (typeof target === 'string' && target.length > 0) {
-				window.location.href = target;
-			}
+		infoButton.addEventListener('click', () => {
+			setVisibility(!isVisible);
 		});
-
-		// Prev/Next with wrap-around
-		const prevIdx = total > 0 ? (safeIdx - 1 + total) % total : 0;
-		const nextIdx = total > 0 ? (safeIdx + 1) % total : 0;
-		prevLink.href = total > 0 ? manifest[prevIdx] : '/';
-		prevLink.setAttribute('aria-label', 'Previous splash');
-		prevLink.className = 'overlay-single-line';
-		nextLink.href = total > 0 ? manifest[nextIdx] : '/';
-		nextLink.setAttribute('aria-label', 'Next splash');
-		nextLink.className = 'overlay-single-line';
-		if (description?.trim()) {
-			const trimmedDescription = description.trim();
-			const infoButton = document.createElement('button');
-			infoButton.type = 'button';
-			infoButton.textContent = 'info';
-			infoButton.setAttribute('aria-label', 'Toggle description');
-			infoButton.setAttribute('aria-expanded', 'false');
-			infoButton.setAttribute('aria-pressed', 'false');
-			infoButton.setAttribute('aria-haspopup', 'true');
-			infoButton.className = 'overlay-single-line';
-			firstRow.appendChild(infoButton);
-
-			descriptionRow = document.createElement('div');
-			descriptionRow.className = 'splash-overlay-row splash-description-row';
-			descriptionRow.hidden = true;
-
-			const descriptionBox = document.createElement('div');
-			descriptionBox.className = 'splash-description';
-			descriptionBox.setAttribute('aria-live', 'polite');
-
-			const descriptionText = document.createElement('span');
-			descriptionText.className = 'splash-description-text';
-			descriptionText.textContent = trimmedDescription;
-			descriptionBox.appendChild(descriptionText);
-			descriptionRow.appendChild(descriptionBox);
-
-			let isVisible = false;
-			const setVisibility = (visible: boolean) => {
-				isVisible = visible;
-				if (descriptionRow) {
-					descriptionRow.hidden = !visible;
-				}
-				infoButton.setAttribute('aria-expanded', String(visible));
-				infoButton.setAttribute('aria-pressed', String(visible));
-			};
-
-			infoButton.addEventListener('click', () => {
-				setVisibility(!isVisible);
-			});
-		}
-	} catch {
-		const errorCounterDiv = document.createElement('div');
-		errorCounterDiv.textContent = '#? / ?';
-		firstRow.appendChild(errorCounterDiv);
-		randomLink.href = '/index.html';
-		prevLink.href = '/';
-		nextLink.href = '/';
 	}
 
 	// Add buttons to buttons row
@@ -215,5 +191,3 @@ export async function initSplashOverlay(): Promise<void> {
 	(window as any).__splashOverlayKeyHandler = handleKeyDown;
 	document.addEventListener('keydown', handleKeyDown);
 }
-
-
