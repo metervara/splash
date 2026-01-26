@@ -1,4 +1,4 @@
-import { Vector2 } from '../../shared/physics2d/Vector2';
+import { Vector2 } from '../../../shared/physics2d/Vector2';
 
 const DEG_TO_RAD = Math.PI / 180;
 

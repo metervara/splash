@@ -20,6 +20,7 @@
     "vite": "^7.1.10"
   },
   "dependencies": {
+    "@metervara/grid-listing": "github:metervara/grid-listing#v0.5.0",
     "figlet": "^1.9.4",
     "space-colonization": "github:metervara/2d-space-colonization-experiments#feat/library",
     "vec2": "^1.6.1"

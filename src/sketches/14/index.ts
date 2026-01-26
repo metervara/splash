@@ -1,7 +1,7 @@
-import { VerletMass, Vector2 } from "../shared/physics2d";
+import { VerletMass, Vector2 } from "../../shared/physics2d";
 import { initSplashOverlay } from "/src/shared/utils";
 import { getQuads } from "./quads";
-import { lerpRGB, clamp } from "../shared/utils";
+import { lerpRGB, clamp } from "../../shared/utils";
 
 // const colors = [
 //   ["#df0049", "#660671"], // red

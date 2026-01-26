@@ -1,4 +1,4 @@
-import { bellCurveSegmentAngles } from "../shared/bellCurve";
+import { bellCurveSegmentAngles } from "../../shared/bellCurve";
 import { initSplashOverlay } from "/src/shared/utils";
 
 
