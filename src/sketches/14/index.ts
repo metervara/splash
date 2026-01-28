@@ -419,6 +419,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     ribbon.resize();
   });
 
+  setTimeout(() => {
+    ribbon.resize();
+  }, 50);
+
   window.addEventListener("pointermove", (e: PointerEvent) => {
     ribbon.updateFollowPoint(e.clientX, e.clientY);
   });
