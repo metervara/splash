@@ -26,7 +26,7 @@ grid.setItems(manifest.items.map(item => ({
   title: item.title,
   description: item.description,
   tags: item.tags,
-  thumbnails: item.thumbnail ? [`/src/sketches/${item.thumbnail}`] : undefined,
+  thumbnails: item.thumbnail ? [`/${item.thumbnail}`] : undefined,
   href: item.href,
   group: item.group
 } as GridItem)));

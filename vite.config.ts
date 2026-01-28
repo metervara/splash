@@ -101,24 +101,57 @@ export default defineConfig(({ command }) => {
             }),
             splashDevServerPlugin(),
             // After build, move dist/src/sketches/N/index.html -> dist/N/index.html
+            // and copy static assets (thumbnails, etc.) from source to dist/N/
             {
                 name: 'restructure-sketch-output-to-root',
                 apply: 'build',
                 closeBundle() {
                     const outDir = path.resolve(process.cwd(), 'dist');
                     const sketchesOut = path.join(outDir, 'src', 'sketches');
+                    const sketchesSrc = path.resolve(process.cwd(), 'src', 'sketches');
+                    
                     if (!fs.existsSync(sketchesOut)) return;
+                    
                     const entries = fs.readdirSync(sketchesOut, { withFileTypes: true })
                         .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
                         .map((d) => d.name)
                         .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+                    
                     for (const dir of entries) {
-                        const fromPath = path.join(sketchesOut, dir, 'index.html');
-                        if (!fs.existsSync(fromPath)) continue;
                         const destDir = path.join(outDir, dir);
-                        const toPath = path.join(destDir, 'index.html');
                         if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-                        fs.renameSync(fromPath, toPath);
+                        
+                        // Move index.html from dist/src/sketches/N/ to dist/N/
+                        const indexFromPath = path.join(sketchesOut, dir, 'index.html');
+                        if (fs.existsSync(indexFromPath)) {
+                            const indexToPath = path.join(destDir, 'index.html');
+                            fs.renameSync(indexFromPath, indexToPath);
+                        }
+                        
+                        // Copy static assets (thumbnails, etc.) from source to dist/N/
+                        const sourceDir = path.join(sketchesSrc, dir);
+                        if (fs.existsSync(sourceDir)) {
+                            const copyRecursive = (src: string, dest: string) => {
+                                if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+                                const entries = fs.readdirSync(src, { withFileTypes: true });
+                                for (const entry of entries) {
+                                    const srcPath = path.join(src, entry.name);
+                                    const destPath = path.join(dest, entry.name);
+                                    
+                                    // Skip index.html, index.ts, index.css as they're handled by Vite
+                                    if (entry.name === 'index.html' || entry.name === 'index.ts' || entry.name === 'index.css') {
+                                        continue;
+                                    }
+                                    
+                                    if (entry.isDirectory()) {
+                                        copyRecursive(srcPath, destPath);
+                                    } else {
+                                        fs.copyFileSync(srcPath, destPath);
+                                    }
+                                }
+                            };
+                            copyRecursive(sourceDir, destDir);
+                        }
                     }
                 },
             },
