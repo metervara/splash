@@ -1,9 +1,8 @@
 :root {
   --gap: 0.5em; 
   --line-height: 1.5;
-  --bullet: "♦";  /* ○ ⦾ ● • ❏ ❐ ❑ ❒ ❖ ❘ ❙ ❚ ❛ ❜ ❝ ❞ ❡ ❢ ❣ ♥ ♦ ♣ ♠ ♦ ♣ ♠ */
-  /* --bullet-color:#aaaaff; */
-  --bullet-color:#ae003a;
+  /* --bullet: "♦"; */  /* ○ ⦾ ● • ❏ ❐ ❑ ❒ ❖ ❘ ❙ ❚ ❛ ❜ ❝ ❞ ❡ ❢ ❣ ♥ ♦ ♣ ♠ ♦ ♣ ♠ */
+  /* --bullet-color:#ae003a; */
   --font-size: max(18px, 3vw); 
 
   --text-color: #0000aa;
@@ -76,12 +75,12 @@ li {
 }
 
 /* Inline bullets between items for the lists we render */
-#title > li + li::before,
+/* #title > li + li::before,
 #covers > li + li::before {
   content: var(--bullet);
   margin-inline: var(--gap);
   color: var(--bullet-color);
-}
+} */
 
 a {
   color: var(--link-color);

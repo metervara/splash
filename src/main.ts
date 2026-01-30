@@ -1,14 +1,13 @@
-import { GridList, type GridItem } from '@metervara/grid-listing';
+import { createGridList, type GridItem } from '@metervara/grid-listing';
 import '@metervara/grid-listing/styles';
 import manifest from 'virtual:grid-manifest';
 
 const gridEl = document.getElementById('grid') as HTMLElement;
-const headerEl = document.getElementById('header') as HTMLElement | null;
+// const headerEl = document.getElementById('header') as HTMLElement | null;
 const measureViewportEl = document.getElementById('measure-viewport') as HTMLElement;
 
-const grid = new GridList({
+const grid = createGridList({
   gridEl,
-  headerEl,
   measureViewportEl,
   desiredBlockSize: { width: 400, height: 300 },
   gap: 10,
@@ -17,7 +16,6 @@ const grid = new GridList({
   fadeStaggerStepMs: 50,
   initialResizeDelayFrames: 2,
   initialScrollDelayMs: 1750,
-  filterScrollDelayMs: 400
 });
 
 grid.init();
