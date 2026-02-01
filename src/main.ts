@@ -11,7 +11,7 @@ const items: GridItem[] = manifest.items.map((item) => ({
   title: item.title ?? '',
   description: item.description,
   tags: item.tags,
-  thumbnails: item.thumbnail ? [`/${item.thumbnail}`] : undefined,
+  thumbnail: item.thumbnail ? `/${item.thumbnail}` : undefined,
   href: item.href,
   group: item.group
 }));
@@ -49,19 +49,12 @@ grid.events.on("scroll:end", ({ aboveHeader, belowHeader }) => {
 
 grid.events.on("initial:scroll:end", ({ aboveHeader, belowHeader }) => {
   console.log("Initial scroll ended - Show descriptions");
-  
+
   const activeItems = getActiveItems(aboveHeader, belowHeader);
   console.log(`Active items: "${activeItems.map((item) => item.title).join(", ")}"`);
 });
 
 grid.init();
 
-grid.setItems(manifest.items.map(item => ({
-  id: item.name,
-  title: item.title,
-  description: item.description,
-  tags: item.tags,
-  thumbnails: item.thumbnail ? [`/${item.thumbnail}`] : undefined,
-  href: item.href,
-  group: item.group
-} as GridItem)));
+//
+grid.setItems(items.map(({title, ...rest}) => rest));

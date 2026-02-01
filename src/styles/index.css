@@ -1,3 +1,20 @@
+body.metervara-sketches{
+  /* --block-gap: 10px; */
+
+  --block-border-color: #000; /*#ff9933; */ 
+  --block-background-color: #000;
+
+  --background-color: #000; /* #12127a; */ /* #2020cf; */
+  --grid-color-vertical: #ED446A; 
+  --grid-color-horizontal: #57BABC;
+
+  --text-color: #faf3d1;
+  --header-sub-color: #45e0e3; /*#ffea81; */ 
+  --header-main-color: var(--header-sub-color); /* #f76eb3; */
+
+  --block-border-width: 0px;
+}
+
 /* Global styles */
 * {
   padding: 0;
@@ -26,15 +43,23 @@ html, body {
 }
 
 /* Header styles */
-h1 {
+h1, h2 {
   /* font-family: 'IBM Plex Mono', monospace; */
-  font-size: max(3.125rem, min(8vw, 15vh));
+  font-size: max(5rem, 10vw);/* max(3.125rem, min(8vw, 15vh)) */ 
   font-weight: 400;
   font-style: normal;
-
-  color: var(--header-main-color);
   line-height: 1;
+  margin: var(--block-gap);
 }
+
+h1 {
+  color: var(--header-main-color);
+}
+
+h2 {
+  color: var(--header-sub-color);
+}
+
 
 h3{
   font-weight: var(--default-font-weight);
@@ -61,11 +86,25 @@ p.description {
 }
 
 /* Grid listing styles */
+.fixed-header {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: flex-end; */
+  justify-content: center;
+}
 /* HEader above the gap */
 header.fixed-header {
   top: calc((var(--header-row) - 1) * (var(--block-height) + var(--block-gap)));
-  /* background-color: red; */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  
+  
+  padding: 0;
+  border: none;
+  
+}
+
+.fixed-header.description-header {
+  /* justify-content: flex-end; */
+
+  padding: 0;
+  border: none;
 }
