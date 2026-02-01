@@ -3,6 +3,123 @@ import fs from 'fs';
 import path from 'path';
 import { gridManifestPlugin } from '@metervara/grid-listing/vite-plugin';
 
+const THUMBNAIL_PATTERNS = [
+    'thumbnail.png', 'thumbnail.jpg', 'thumbnail.jpeg',
+    'thumbnail.webp', 'thumbnail.gif', 'thumbnail.mp4', 'thumbnail.webm',
+];
+
+type GridManifestItem = {
+    path: string;
+    name: string;
+    group: string;
+    title?: string;
+    description?: string;
+    short?: string;
+    tags?: string[];
+    thumbnail?: string;
+    href: string;
+    hidden: boolean;
+};
+
+function findDirsWithIndex(dir: string): string[] {
+    if (!fs.existsSync(dir)) return [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const result: string[] = [];
+    for (const e of entries) {
+        if (!e.isDirectory()) continue;
+        const full = path.join(dir, e.name);
+        const indexPath = path.join(full, 'index.html');
+        if (fs.existsSync(indexPath)) result.push(full);
+        result.push(...findDirsWithIndex(full));
+    }
+    return result;
+}
+
+function extractMetaContent(html: string, name: string): string | undefined {
+    const re = new RegExp(
+        `<meta[^>]*name=["']${name}["'][^>]*content=["']([^"']*)["'][^>]*>|` +
+        `<meta[^>]*content=["']([^"']*)["'][^>]*name=["']${name}["'][^>]*>`,
+        'i'
+    );
+    const m = html.match(re);
+    if (!m) return undefined;
+    return (m[1] ?? m[2])?.trim();
+}
+
+function extractTags(html: string): string[] {
+    const content = extractMetaContent(html, 'tags');
+    if (!content) return [];
+    return content.split(',').map((s) => s.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b));
+}
+
+function buildGridManifestWithShort(
+    dir: string,
+    options: { basePath?: string; includeHidden?: boolean }
+): GridManifestItem[] {
+    const basePath = (options.basePath ?? '/').replace(/\/+$/, '') + '/';
+    const includeHidden = options.includeHidden ?? false;
+    const dirs = findDirsWithIndex(dir);
+    const items: GridManifestItem[] = [];
+    for (const absDir of dirs) {
+        const relPath = path.relative(dir, absDir);
+        const name = path.basename(absDir);
+        const hidden = name.startsWith('_');
+        if (hidden && !includeHidden) continue;
+        const pathPosix = relPath.split(path.sep).join('/');
+        const group = pathPosix.includes('/') ? pathPosix.split('/')[0]! : 'misc';
+        const indexPath = path.join(absDir, 'index.html');
+        const html = fs.readFileSync(indexPath, 'utf8');
+        const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
+        const description = extractMetaContent(html, 'description');
+        const short = extractMetaContent(html, 'short');
+        const tags = extractTags(html);
+        let thumbnail: string | undefined;
+        for (const p of THUMBNAIL_PATTERNS) {
+            if (fs.existsSync(path.join(absDir, p))) {
+                thumbnail = `${pathPosix}/${p}`.replace(/\\/g, '/');
+                break;
+            }
+        }
+        const href = `${basePath}${pathPosix}/`.replace(/\/+/g, '/');
+        items.push({
+            path: pathPosix,
+            name,
+            group,
+            title,
+            description,
+            short,
+            tags: tags.length > 0 ? tags : undefined,
+            thumbnail,
+            href,
+            hidden,
+        });
+    }
+    return items.sort((a, b) => {
+        const na = parseInt(a.name, 10);
+        const nb = parseInt(b.name, 10);
+        if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+        return a.path.localeCompare(b.path);
+    });
+}
+
+function gridManifestWithShortPlugin(manifestDir: string, basePath = '/') {
+    const moduleId = 'virtual:grid-manifest';
+    const resolvedId = '\0' + moduleId;
+    return {
+        name: 'grid-manifest-with-short',
+        enforce: 'pre' as const,
+        resolveId(id: string) {
+            if (id === moduleId) return resolvedId;
+            return null;
+        },
+        load(id: string) {
+            if (id !== resolvedId) return null;
+            const items = buildGridManifestWithShort(manifestDir, { basePath, includeHidden: false });
+            return `export default ${JSON.stringify({ items }, null, 2)};`;
+        },
+    };
+}
+
 type SplashPage = {
     id: string;
     name: string;
@@ -93,10 +210,12 @@ export default defineConfig(({ command }) => {
 		input[page.name] = page.absPath;
 	}
 
+    const sketchesDir = path.resolve(projectRoot, 'src/sketches');
     return {
         plugins: [
+            gridManifestWithShortPlugin(sketchesDir, '/'),
             gridManifestPlugin({
-                dir: path.resolve(projectRoot, 'src/sketches'),
+                dir: sketchesDir,
                 basePath: '/',
             }),
             splashDevServerPlugin(),
