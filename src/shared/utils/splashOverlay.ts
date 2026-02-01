@@ -26,7 +26,7 @@ export function initSplashOverlay(): void {
 	buttonsRow.className = 'splash-overlay-row';
 
 	const randomLink = document.createElement('a');
-	randomLink.textContent = 'Randomize';
+	randomLink.textContent = 'Random';
 
 	const prevLink = document.createElement('a');
 	prevLink.textContent = '<';

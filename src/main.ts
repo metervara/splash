@@ -49,7 +49,7 @@ const showInfoAfterPaint = () => {
   });
 };
 
-const updateInfoBlockContent = (items: GridItem[]) => {
+const updateInfoBlockContent = (activeItems: GridItem[]) => {
   console.log("UPDATE BLOCK CONTENT");
   // console.log(`update info for active items: "${items.map((item) => item.title).join(", ")}"`);
 
@@ -57,22 +57,22 @@ const updateInfoBlockContent = (items: GridItem[]) => {
     block.innerHTML = '';
     const topIndex = index;
     const bottomIndex = index + grid.getLayout().cols;
-    if(topIndex < items.length) {
-      const topItem = items[topIndex];
-      block.appendChild(createInfoItem(topItem, topIndex, 'top'));
+    if(topIndex < activeItems.length) {
+      const topItem = activeItems[topIndex];
+      block.appendChild(createInfoItem(topItem, topIndex, items.indexOf(topItem), 'top'));
     }
-    if(bottomIndex < items.length) {
-      const bottomItem = items[bottomIndex];
-      block.appendChild(createInfoItem(bottomItem, topIndex, 'bottom'));
+    if(bottomIndex < activeItems.length) {
+      const bottomItem = activeItems[bottomIndex];
+      block.appendChild(createInfoItem(bottomItem, topIndex, items.indexOf(bottomItem), 'bottom'));
     }
   });
 }
 
-const createInfoItem = (item: GridItem, index: number, classNames: string = '') => {
+const createInfoItem = (item: GridItem, index: number, fullIndex: number, classNames: string = '') => {
   const itemEl = document.createElement('div');
   itemEl.className = `info-item ${classNames}`;
   itemEl.style.setProperty('--info-item-in-delay', `${index * 75}ms`);
-  itemEl.innerHTML = `<span>${index + 1}/${items.length}</span> • <strong>${item.title}</strong> • <span>${item.short}</span>`;
+  itemEl.innerHTML = `<span>${fullIndex + 1}/${items.length}</span> • <strong>${item.title}</strong> • <span>${item.short}</span>`;
   return itemEl;
 }
 
