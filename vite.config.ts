@@ -184,14 +184,14 @@ function splashDevServerPlugin() {
                 const [pathname, qs] = raw.split(/\?/, 2);
                 const query = qs ? `?${qs}` : '';
 
-                // Asset or nested path: /N/<rest>
-                const asset = pathname.match(/^\/(\d+)\/(.+)$/);
+                // Asset or nested path: /N/<rest> or /_name/<rest>
+                const asset = pathname.match(/^\/(\d+)\/(.+)$/) ?? pathname.match(/^\/(_.+?)\/(.+)$/);
                 if (asset) {
                     req.url = `/src/sketches/${asset[1]}/${asset[2]}${query}`;
                     return next();
                 }
-                // Folder root: /N/ or /N -> index.html
-                const page = pathname.match(/^\/(\d+)\/?$/);
+                // Folder root: /N/ or /_name/ -> index.html
+                const page = pathname.match(/^\/(\d+)\/?$/) ?? pathname.match(/^\/(_.+?)\/?$/);
                 if (page) {
                     req.url = `/src/sketches/${page[1]}/index.html${query}`;
                     return next();
