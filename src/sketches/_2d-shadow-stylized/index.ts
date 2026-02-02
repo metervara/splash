@@ -92,11 +92,11 @@ function isPointInPolygon(px: number, py: number, edges: Edge[]): boolean {
 }
 
 const PROJ_SCALE = 100;
-const GRADIENT_RADIUS = 600;
+// const GRADIENT_RADIUS = 600;
 
 const updateCanvas = (x: number | null = null, y: number | null = null) => {
   const bgColor = '#ffff99';
-  const shadowColor = "#999933";
+  // const shadowColor = "#999933";
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -111,7 +111,6 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
       const { castingChains } = findShadowSilhouette(scaledOuterEdges[li], light);
 
       ctx.save();
-      ctx.globalCompositeOperation = "source-over";
 
       // Sort chains: closest first so farthest (lighter) shadow wins in overlaps
       const chainDist = (chain: typeof castingChains[0]) => {
@@ -133,10 +132,11 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
           y: v.y + (v.y - y) * PROJ_SCALE,
         }));
 
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS);
-        grad.addColorStop(0, shadowColor);
-        grad.addColorStop(1, bgColor);
-        ctx.fillStyle = grad;
+        // const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS);
+        // grad.addColorStop(0, shadowColor);
+        // grad.addColorStop(1, bgColor);
+        // ctx.fillStyle = grad;
+        ctx.fillStyle = "blue";
 
         ctx.beginPath();
         ctx.moveTo(verts[0].x, verts[0].y);
@@ -154,13 +154,11 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
     }
   }
 
-  ctx.globalCompositeOperation = "source-over";
-
   // Draw all letter shapes on top using canvas transform with original SVG paths
   ctx.save();
   ctx.translate(currentOffsetX, currentOffsetY);
   ctx.scale(currentScale, currentScale);
-  ctx.fillStyle = 'blue';
+  ctx.fillStyle =  '#66aa99';
   for (const path of letterPaths) {
     const p = new Path2D(path);
     ctx.fill(p);

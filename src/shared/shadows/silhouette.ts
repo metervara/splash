@@ -17,11 +17,10 @@ export type BoundaryPoint = {
 const eq = (a: Vec2, b: Vec2, eps = 1e-9) =>
   Math.abs(a.x - b.x) <= eps && Math.abs(a.y - b.y) <= eps
 
-// Per your old formula: n = (dy, dx)
 const normalFromEdge = (a: Vec2, b: Vec2): Vec2 => {
   const dx = b.x - a.x
   const dy = b.y - a.y
-  return { x: dy, y: dx }
+  return { x: dy, y: -dx }
 }
 
 const verticesFromEdges = (edges: Edge[], eps = 1e-9): Vec2[] => {
@@ -46,7 +45,8 @@ const verticesFromEdges = (edges: Edge[], eps = 1e-9): Vec2[] => {
 export const findShadowSilhouette = (
   edges: Edge[],
   light: Light,
-  eps = 1e-9
+  eps = 1e-9,
+  isHole = false
 ): {
   isFrontFacing: boolean[]
   boundary: BoundaryPoint[]
@@ -72,7 +72,7 @@ export const findShadowSilhouette = (
     const N = isCCW ? N0 : { x: -N0.x, y: -N0.y }
 
     const toLight = toLightDirection(light, edgeCenter(e))
-    isFrontFacing[i] = dot(N, toLight) > 0
+    isFrontFacing[i] = isHole ? dot(N, toLight) < 0 : dot(N, toLight) > 0
   }
 
   // 2) boundary points + edge flags

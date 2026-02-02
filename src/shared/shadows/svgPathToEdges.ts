@@ -47,8 +47,7 @@ export const svgPathToEdges = (d: string): Edge[] => {
   const isCommand = (t: string) => /^[a-zA-Z]$/.test(t)
 
   const lineTo = (next: Vec2) => {
-    // Skip zero-length edges if you want:
-    // if (next.x === cur.x && next.y === cur.y) return
+    if (eq(cur, next)) return
     edges.push(edge(cur, next, true, true))
     cur = next
   }
@@ -121,6 +120,36 @@ export const svgPathToEdges = (d: string): Edge[] => {
         while (i < tokens.length && !isCommand(tokens[i])) {
           const vy = readNumber()
           lineTo(v2(cur.x, vy))
+        }
+        break
+      }
+
+      case "C": {
+        const BEZIER_SEGMENTS = 16
+        const x1 = readNumber(), y1 = readNumber()
+        const x2 = readNumber(), y2 = readNumber()
+        const ex = readNumber(), ey = readNumber()
+        const p0 = cur, p1 = v2(x1, y1), p2 = v2(x2, y2), p3 = v2(ex, ey)
+        for (let s = 1; s <= BEZIER_SEGMENTS; s++) {
+          const t = s / BEZIER_SEGMENTS, mt = 1 - t
+          lineTo(v2(
+            mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x,
+            mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y,
+          ))
+        }
+        // implicit repetition: consume additional coordinate sextuplets
+        while (i < tokens.length && !isCommand(tokens[i])) {
+          const cx1 = readNumber(), cy1 = readNumber()
+          const cx2 = readNumber(), cy2 = readNumber()
+          const cex = readNumber(), cey = readNumber()
+          const cp0 = cur, cp1 = v2(cx1, cy1), cp2 = v2(cx2, cy2), cp3 = v2(cex, cey)
+          for (let s = 1; s <= BEZIER_SEGMENTS; s++) {
+            const t = s / BEZIER_SEGMENTS, mt = 1 - t
+            lineTo(v2(
+              mt*mt*mt*cp0.x + 3*mt*mt*t*cp1.x + 3*mt*t*t*cp2.x + t*t*t*cp3.x,
+              mt*mt*mt*cp0.y + 3*mt*mt*t*cp1.y + 3*mt*t*t*cp2.y + t*t*t*cp3.y,
+            ))
+          }
         }
         break
       }
