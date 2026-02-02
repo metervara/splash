@@ -100,61 +100,58 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw shadows for each letter individually
+  // Collect all shadow chains (outer + holes), sort by distance, draw together
   if (x !== null && y !== null) {
     light.position = { x, y };
 
+    const allChains: Edge[][] = [];
+
     for (let li = 0; li < scaledOuterEdges.length; li++) {
-      // Per-letter inside check: skip shadow when light is inside this letter
       if (ENABLE_INSIDE_CHECK && isPointInPolygon(x, y, scaledOuterEdges[li])) continue;
-
       const { castingChains } = findShadowSilhouette(scaledOuterEdges[li], light);
+      allChains.push(...castingChains);
 
-      ctx.save();
-      ctx.globalCompositeOperation = "source-over";
-
-      // Sort chains: closest first so farthest (lighter) shadow wins in overlaps
-      const chainDist = (chain: typeof castingChains[0]) => {
-        const verts = [chain[0].start, ...chain.map(e => e.end)];
-        const mx = verts.reduce((s, v) => s + v.x, 0) / verts.length;
-        const my = verts.reduce((s, v) => s + v.y, 0) / verts.length;
-        return Math.hypot(mx - x, my - y);
-      };
-      const sorted = [...castingChains].sort((a, b) => chainDist(a) - chainDist(b));
-
-      for (const chain of sorted) {
-        const verts = [chain[0].start];
-        for (const edge of chain) {
-          verts.push(edge.end);
-        }
-
-        const projected = verts.map(v => ({
-          x: v.x + (v.x - x) * PROJ_SCALE,
-          y: v.y + (v.y - y) * PROJ_SCALE,
-        }));
-
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS);
-        grad.addColorStop(0, shadowColor);
-        grad.addColorStop(1, bgColor);
-        ctx.fillStyle = grad;
-
-        ctx.beginPath();
-        ctx.moveTo(verts[0].x, verts[0].y);
-        for (let i = 1; i < verts.length; i++) {
-          ctx.lineTo(verts[i].x, verts[i].y);
-        }
-        for (let i = projected.length - 1; i >= 0; i--) {
-          ctx.lineTo(projected[i].x, projected[i].y);
-        }
-        ctx.closePath();
-        ctx.fill();
+      for (const holeEdges of _scaledHoleEdges[li]) {
+        const hole = findShadowSilhouette(holeEdges, light, 1e-9, true);
+        allChains.push(...hole.castingChains);
       }
-
-      ctx.restore();
     }
-  }
 
-  ctx.globalCompositeOperation = "source-over";
+    // Sort: closest first so farthest (lighter) shadow wins in overlaps
+    const chainDist = (chain: Edge[]) => {
+      const verts = [chain[0].start, ...chain.map(e => e.end)];
+      const mx = verts.reduce((s, v) => s + v.x, 0) / verts.length;
+      const my = verts.reduce((s, v) => s + v.y, 0) / verts.length;
+      return Math.hypot(mx - x, my - y);
+    };
+    allChains.sort((a, b) => chainDist(a) - chainDist(b));
+
+    ctx.save();
+
+    for (const chain of allChains) {
+      const verts = [chain[0].start];
+      for (const edge of chain) verts.push(edge.end);
+
+      const projected = verts.map(v => ({
+        x: v.x + (v.x - x) * PROJ_SCALE,
+        y: v.y + (v.y - y) * PROJ_SCALE,
+      }));
+
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS);
+      grad.addColorStop(0, shadowColor);
+      grad.addColorStop(1, bgColor);
+      ctx.fillStyle = grad;
+
+      ctx.beginPath();
+      ctx.moveTo(verts[0].x, verts[0].y);
+      for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
+      for (let i = projected.length - 1; i >= 0; i--) ctx.lineTo(projected[i].x, projected[i].y);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
 
   // Draw all letter shapes on top using canvas transform with original SVG paths
   ctx.save();
@@ -166,33 +163,6 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
     ctx.fill(p);
   }
   ctx.restore();
-
-  // Draw hole shadows on top of everything in red (debug)
-  if (x !== null && y !== null) {
-    for (let li = 0; li < _scaledHoleEdges.length; li++) {
-      for (const holeEdges of _scaledHoleEdges[li]) {
-        const { castingChains } = findShadowSilhouette(holeEdges, light, 1e-9, true);
-
-        for (const chain of castingChains) {
-          const verts = [chain[0].start];
-          for (const edge of chain) verts.push(edge.end);
-
-          const projected = verts.map(v => ({
-            x: v.x + (v.x - x) * PROJ_SCALE,
-            y: v.y + (v.y - y) * PROJ_SCALE,
-          }));
-
-          ctx.fillStyle = 'red';
-          ctx.beginPath();
-          ctx.moveTo(verts[0].x, verts[0].y);
-          for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
-          for (let i = projected.length - 1; i >= 0; i--) ctx.lineTo(projected[i].x, projected[i].y);
-          ctx.closePath();
-          ctx.fill();
-        }
-      }
-    }
-  }
 }
 
 const resizeCanvas = () => {
