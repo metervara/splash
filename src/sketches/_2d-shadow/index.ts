@@ -92,13 +92,26 @@ function isPointInPolygon(px: number, py: number, edges: Edge[]): boolean {
 }
 
 const PROJ_SCALE = 100;
-const GRADIENT_RADIUS = 600;
+const GRADIENT_RADIUS = 0.6; // Factor of viewport width
 
 const updateCanvas = (x: number | null = null, y: number | null = null) => {
-  const bgColor = '#ffff99';
-  const shadowColor = "#999933";
+  const bgColor = "#880033";
+  const shadowColor = "#0000ff";
+
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Light glow behind everything
+  if (x !== null && y !== null) {
+    const glowRadius = GRADIENT_RADIUS * canvas.width;
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+    glow.addColorStop(0, '#ff9999');
+    glow.addColorStop(1, bgColor);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Collect all shadow chains (outer + holes), sort by distance, draw together
   if (x !== null && y !== null) {
@@ -128,6 +141,11 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
 
     ctx.save();
 
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS * canvas.width);
+    grad.addColorStop(0, shadowColor);
+    grad.addColorStop(1, bgColor);
+    ctx.fillStyle = grad;
+
     for (const chain of allChains) {
       const verts = [chain[0].start];
       for (const edge of chain) verts.push(edge.end);
@@ -136,11 +154,6 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
         x: v.x + (v.x - x) * PROJ_SCALE,
         y: v.y + (v.y - y) * PROJ_SCALE,
       }));
-
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, GRADIENT_RADIUS);
-      grad.addColorStop(0, shadowColor);
-      grad.addColorStop(1, bgColor);
-      ctx.fillStyle = grad;
 
       ctx.beginPath();
       ctx.moveTo(verts[0].x, verts[0].y);
@@ -157,7 +170,7 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
   ctx.save();
   ctx.translate(currentOffsetX, currentOffsetY);
   ctx.scale(currentScale, currentScale);
-  ctx.fillStyle = 'blue';
+  ctx.fillStyle = '#15BABC';
   for (const path of letterPaths) {
     const p = new Path2D(path);
     ctx.fill(p);
