@@ -84,7 +84,7 @@ function isPointInPolygon(px: number, py: number, edges: Edge[]): boolean {
   for (const e of edges) {
     const { start, end } = e;
     if (((start.y > py) !== (end.y > py)) &&
-        (px < (end.x - start.x) * (py - start.y) / (end.y - start.y) + start.x)) {
+    (px < (end.x - start.x) * (py - start.y) / (end.y - start.y) + start.x)) {
       inside = !inside;
     }
   }
@@ -92,16 +92,45 @@ function isPointInPolygon(px: number, py: number, edges: Edge[]): boolean {
 }
 
 const PROJ_SCALE = 100;
-// const GRADIENT_RADIUS = 600;
+
+// const bgColor = '#ffff99';
+// const lineColor = 'red';
+// const shadowColor = 'blue';
+// const letterColor = '#66aa99';
+// const holeColor = 'red';
+
+const bgColor = 'red';
+const lineColor = '#ffff99';
+const shadowColor = 'blue';
+const letterColor = '#15BABC';
+const holeColor = '#ffff99';
+
+const drawRadiatingLines = (cx: number, cy: number, count: number, radius: number) => {
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+  
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+  
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+}
 
 const updateCanvas = (x: number | null = null, y: number | null = null) => {
-  const bgColor = '#ffff99';
-  // const shadowColor = "#999933";
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Draw shadows for each letter individually
   if (x !== null && y !== null) {
+
+    ctx.fillStyle = 'none';
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 10;
+    drawRadiatingLines(x, y, 50, window.innerWidth * 2);
+
     light.position = { x, y };
 
     for (let li = 0; li < scaledOuterEdges.length; li++) {
@@ -136,7 +165,7 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
         // grad.addColorStop(0, shadowColor);
         // grad.addColorStop(1, bgColor);
         // ctx.fillStyle = grad;
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = shadowColor;
 
         ctx.beginPath();
         ctx.moveTo(verts[0].x, verts[0].y);
@@ -158,7 +187,7 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
   ctx.save();
   ctx.translate(currentOffsetX, currentOffsetY);
   ctx.scale(currentScale, currentScale);
-  ctx.fillStyle =  '#66aa99';
+  ctx.fillStyle =  letterColor;
   for (const path of letterPaths) {
     const p = new Path2D(path);
     ctx.fill(p);
@@ -180,7 +209,7 @@ const updateCanvas = (x: number | null = null, y: number | null = null) => {
             y: v.y + (v.y - y) * PROJ_SCALE,
           }));
 
-          ctx.fillStyle = 'red';
+          ctx.fillStyle = holeColor;
           ctx.beginPath();
           ctx.moveTo(verts[0].x, verts[0].y);
           for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
