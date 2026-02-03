@@ -1,0 +1,94 @@
+:root {
+  --end-color: #340fc7;
+  --start-color: #02beab;
+
+  --color-0: color-mix(in oklch, var(--start-color) 80%, var(--end-color) 20%);
+  --color-1: color-mix(in oklch, var(--start-color) 60%, var(--end-color) 40%);
+  --color-2: color-mix(in oklch, var(--start-color) 40%, var(--end-color) 60%);
+  --color-3: color-mix(in oklch, var(--start-color) 20%, var(--end-color) 80%);
+
+  --shadow-offset: 100px;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+
+  background-color: var(--end-color);
+  color: var(--start-color);
+}
+
+span.scroll-down {
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  bottom: 64px;
+  left: 16px;
+  right: 16px;
+  text-align: center;
+}
+
+section.spacer {
+  width: 100%;
+  height: calc(var(--shadow-offset) * 4 * 0.5);
+}
+
+header {
+  width: 100%;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15vw; /* clamp(2.5rem, 8vw, 8rem); */
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+
+}
+
+@supports (animation-timeline: scroll(root block)) {
+  h1 {
+    animation: shadowScroll linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% calc(var(--shadow-offset) * 4 * 0.5);
+  }
+  #unsupported-overlay {
+    display: none;
+  }
+}
+
+
+@keyframes shadowScroll {
+  from {
+    text-shadow:
+      0 0 0 var(--color-0),
+      0 0 0 var(--color-1),
+      0 0 0 var(--color-2),
+      0 0 0 var(--color-3);
+  }
+
+  to {
+    text-shadow:
+    0 var(--shadow-offset)   0 var(--color-0),
+    0 calc(var(--shadow-offset) * 2)   0 var(--color-1),
+    0 calc(var(--shadow-offset) * 3)   0 var(--color-2),
+    0 calc(var(--shadow-offset) * 4)   0 var(--color-3);
+  }
+}

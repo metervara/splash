@@ -1,3 +1,4 @@
+import './index.css';
 import { initSplashOverlay } from '/src/shared/utils';
 import { initScrollFallback } from './scrollFallback';
 

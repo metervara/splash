@@ -80,6 +80,12 @@ section:nth-child(9) {
   animation: none;
 }
 
+@supports not (animation-timeline: scroll(root block)) {
+  .letter {
+    transform-origin: var(--pivot-x, 50%) var(--pivot-y, 50%);
+  }
+}
+
 @supports (animation-timeline: scroll(root block)) {
   .letter {
     --end-scale: calc(1 + (1 - var(--start-p, 0)) * 2);

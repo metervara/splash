@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text shadow animation</title>
+    <meta name="description" content="Pure CSS scroll-driven animation using animation-timeline to distribute shadows as the user scrolls.">
+    <meta name="short" content="Pure CSS scroll driven shadows animation">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/reset.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <script type="module" src="./index.ts"></script>
+  </head>
+  <body>
+    <div id="unsupported-overlay" class="overlay unsupported">
+      <!-- <a href="https://www.google.com/chrome">CSS animation-timeline not supported in your browser</a> -->
+       <p>CSS animation-timeline not supported in your browser, using JS fallback</p>
+    </div>
+    <header>
+      <h1>Metervara.</h1>
+    </header>
+    <section class="spacer"></section>
+    <span class="scroll-down">scroll down ↓</span>
+  </body>
+</html>
+
